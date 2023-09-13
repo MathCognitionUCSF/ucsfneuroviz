@@ -1,0 +1,5 @@
+{
+    "VoilaConfiguration": {
+        "file_whitelist": [".*\\.(png|jpg|gif|svg|mp4|ogg|webm|html|css|woff|woff2)$"]
+    }
+}
