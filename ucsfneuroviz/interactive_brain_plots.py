@@ -201,7 +201,7 @@ def create_plot(df, compare_brain_data, id_number, dtype, region):
     sns.kdeplot(region_data, ax=ax[1], shade=True)
     z_val = (subject_data - region_data.mean()) / region_data.std()
     ax[1].axvline(x=subject_data, color='r', linestyle='--', label=f'Subject {id_number}: Z={z_val:.2f}')
-    ax[1].set_title(f'Z-Score Distribution of {region}')
+    ax[1].set_title(f'Kernel Density Estimation of {region}')
     ax[1].set_xlabel(dtype)
     ax[1].legend()
     plt.tight_layout()

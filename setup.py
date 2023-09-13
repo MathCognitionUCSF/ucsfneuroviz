@@ -11,5 +11,8 @@ setup(
         'seaborn',
         'nilearn',
         'nibabel',
+        'ipywidgets',
+        'IPython',
+        'os'
     ],
 )

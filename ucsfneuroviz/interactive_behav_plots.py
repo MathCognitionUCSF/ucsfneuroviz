@@ -316,6 +316,53 @@ def interactive_radar(df, groupby_col, FC_vars):
         filtered_df = df[df[groupby_col].isin(group)]
         plot_radar(filtered_df, FC_vars, groupby_col, group)
 
+
+def create_plot(df, compare_behav_data, id_number, dtype, task):
+    """Generate scatter and distribution plots for a specific region."""
+    # df = get_dataframe(dtype)
+    task_data = compare_behav_data[task]
+    subject_data = df[df['id_number'] == id_number][task].values[0]
+
+    fig, ax = plt.subplots(1, 2, figsize=(10, 5), gridspec_kw={'width_ratios': [2, 3]})
+    sns.boxplot(y=task_data, ax=ax[0], color='lightgray', showfliers=False)
+    sns.stripplot(y=task_data, jitter=0.3, size=3, ax=ax[0], alpha=0.6)
+    ax[0].scatter(x=0, y=subject_data, color='red', s=50, label=f'Subject {id_number}: Val={subject_data:.2f}')
+    ax[0].set_title(f'Distribution of {region}')
+    ax[0].set_ylabel(dtype)
+    ax[0].set_xticks([])
+    ax[0].set_xlabel('Subjects')
+    ax[0].legend()
+    sns.kdeplot(task_data, ax=ax[1], shade=True)
+    z_val = (subject_data - task_data.mean()) / task_data.std()
+    ax[1].axvline(x=subject_data, color='r', linestyle='--', label=f'Subject {id_number}: Z={z_val:.2f}')
+    ax[1].set_title(f'Kernel Density Estimation of {region}')
+    ax[1].set_xlabel(dtype)
+    ax[1].legend()
+    plt.tight_layout()
+    return fig
+
+def create_interactive_table(df, compare_behav_data, id_number, perc_data, dtype, thresh, out_plot):
+    """Generate an interactive table for regions with Z-scores above the threshold."""
+    # prominent_regions = [col for col in z_data.columns if z_data[col].abs().mean() > thresh]
+    # perc_data_sorted = sorted(perc_data.columns, key=lambda x: perc_data[x].mean(), reverse=True)
+
+    task_selector = widgets.Select(options=perc_data.columns, description='Region:', rows=25)
+    task_selector.layout.width = '400px'
+  
+    def on_region_selected(change):
+        task = change['new']
+        fig = create_plot(df, compare_behav_data, id_number, dtype, task)
+        with out_plot:
+            out_plot.clear_output(wait=True)
+            display(fig)
+
+    task_selector.observe(on_task_selected, names='value')
+
+    # Trigger the initial plot
+    on_task_selected({'new': perc_data.columns[0]})
+
+    return task_selector
+
 def interactive_individual_line_plot(df, id_col, groupby_col, FC_vars):
     # Dropdown for comparison group selection
     comparison_selector = widgets.Dropdown(
@@ -362,7 +409,8 @@ def interactive_individual_line_plot(df, id_col, groupby_col, FC_vars):
     )
     
     # Create an Output widget
-    out = widgets.Output()
+    out_line = widgets.Output()
+    out_table = widgets.Output()
 
     # Function to update the plot
     def update_plot(button):
@@ -419,9 +467,15 @@ def interactive_individual_line_plot(df, id_col, groupby_col, FC_vars):
         plt.tight_layout()
     
         # show plot as a python widget
-        with out:
-            out.clear_output(wait=True)
+        with out_line:
+            out_line.clear_output(wait=True)
             display(fig)
+
+        # Display the interactive table and the initial box plot and kde plot
+        region_selector = create_interactive_table(df[list(FC_vars.values())], compare_brain_data, id_number, z_data, dtype, thresh_value, out_plot)
+        with out_table:                          
+            out_table.clear_output(wait=True)
+            display(widgets.HBox([region_selector, out_plot]))
 
     # Assign the update function to the button
     plot_button.on_click(update_plot)
