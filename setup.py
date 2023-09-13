@@ -12,7 +12,6 @@ setup(
         'nilearn',
         'nibabel',
         'ipywidgets',
-        'IPython',
-        'os'
+        'IPython'
     ],
 )
