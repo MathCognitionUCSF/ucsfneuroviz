@@ -9,21 +9,20 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import nibabel as nib
 
-from pynteractive.importer import import_dataframe, read_csv_as_list
-
 from matplotlib import font_manager
 
-# Get the path of the script
-script_dir = os.path.dirname(os.path.realpath('__file__'))
+def activate_selected_font(font_name, font_file_name):
+    # Get the path of the script
+    script_dir = os.path.dirname(os.path.realpath('__file__'))
 
-# Use the relative path to locate the font in the repo's directory
-font_path = os.path.join(script_dir, 'fonts/EBGaramond-Regular.ttf')
+    # Use the relative path to locate the font in the repo's directory
+    font_path = os.path.join(script_dir, f'fonts/{font_file_name}')
 
-# Add the font
-font_manager.fontManager.addfont(font_path)
+    # Add the font
+    font_manager.fontManager.addfont(font_path)
 
-# Use the font
-plt.rcParams['font.family'] = 'EB Garamond'
+    # Use the font
+    plt.rcParams['font.family'] = font_name
 
 # Helper functions
 def get_subject_DC_diagnosis(id_number, behavior_df):
@@ -67,35 +66,43 @@ def get_dataframe(struct_df, dtype):
     }
     return dataframes.get(dtype)
 
-def validate_id_number(id_number_str, brain_df):
+def validate_id_number(id_number_str, df, out_error):
     """Validates the ID number input by the user."""
-    if not id_number_str.isdigit():
-        raise ValueError('Please enter a number for the ID number.')
-    if int(id_number_str) not in brain_df['id_number'].values:
-        raise ValueError('Please enter a valid ID number.')
-    return np.int64(id_number_str)
+    if not id_number_str.isdigit() or len(id_number_str) != 5:
+        with out_error:
+            out_error.clear_output(wait=True)
+            display(HTML('<h3 style="color: red;">Error: Please enter a 5-digit number for the ID number.</h3>'))
+        return None
+    elif int(id_number_str) not in df['id_number'].values:
+        with out_error:
+            out_error.clear_output(wait=True)
+            display(HTML('<h3 style="color: red;">Error: The ID number you entered does not exist.</h3>'))
+        return None
+    else:
+        with out_error:
+            out_error.clear_output(wait=True)  # Clear the error if the new ID is valid
+        return np.int64(id_number_str)
 
 def extract_diagnoses(df):
     diagnoses = []
     for col in df.columns:
         if 'Dyslexia Center Diagnosis: (choice=' in col:
-            diagnosis = col.split('=')[-1].replace(')', '')
+            # diagnosis = col.split('=')[-1].replace(')', '')
             diagnoses.append(diagnosis)
     # Append to the front, so that 'All Children' is the first option
     diagnoses.insert(0, 'All Children')
     return diagnoses
 
-def zscore_subject(id_number, brain_df, behavior_df, diagnosis):
+def zscore_subject(id_number, brain_df, behavior_df, col, value):
     """
     Returns:
     z-score for each region of the subject with the given ID number compared to the mean and standard deviation of the given diagnosis group
     compare_brain_data: brain data for the given diagnosis group"""
     # Construct the column name based on diagnosis
-    if diagnosis != 'All Children':
-        column_name = f'Referring Diagnosis: (choice={diagnosis})'
+    if col != 'All Children':
     
         # Get subjects from the behavioral dataframe based on the selected diagnosis
-        compare_subjects = behavior_df[behavior_df[column_name] == 1]['ID Number'].tolist()
+        compare_subjects = behavior_df[behavior_df[col] == value]['ID Number'].tolist()
     
         # Filter the brain data dataframe based on these subjects
         compare_brain_data = brain_df[brain_df['id_number'].isin(compare_subjects)]
@@ -201,7 +208,7 @@ def create_plot(df, compare_brain_data, id_number, dtype, region):
     sns.kdeplot(region_data, ax=ax[1], shade=True)
     z_val = (subject_data - region_data.mean()) / region_data.std()
     ax[1].axvline(x=subject_data, color='r', linestyle='--', label=f'Subject {id_number}: Z={z_val:.2f}')
-    ax[1].set_title(f'Kernel Density Estimation of {region}')
+    ax[1].set_title(f'KDE of {region}')
     ax[1].set_xlabel(dtype)
     ax[1].legend()
     plt.tight_layout()
@@ -231,12 +238,15 @@ def create_interactive_table(df, compare_brain_data, id_number, z_data, dtype, t
 
 def interactive_brain_zscore_plot(brain_df, behavior_df):
 
+    activate_selected_font('EB Garamond', 'EBGaramond-Regular.ttf')
+
     # Output widgets
     out_brain = widgets.Output()
     out_table = widgets.Output()
     out_bar = widgets.Output()
     out_bar.add_class('bar-plot-container')
     out_plot = widgets.Output()
+    out_error = widgets.Output()
     
     # Dropdown for diagnosis selection
     diagnosis_dropdown = widgets.Dropdown(
@@ -274,7 +284,7 @@ def interactive_brain_zscore_plot(brain_df, behavior_df):
 
     # Widgets for user inputs
     thresh_input = widgets.FloatText(
-        value=2,
+        value=1,
         description='Threshold:',
         disabled=False,
         layout={'width': 'max-content'}
@@ -292,7 +302,7 @@ def interactive_brain_zscore_plot(brain_df, behavior_df):
         out_brain.clear_output(wait=True) # Clear the output widget
         dtype = data_type_selector.value
         brain_df_current = get_dataframe(brain_df, dtype)
-        id_number = validate_id_number(id_input.value.strip(), brain_df_current)
+        id_number = validate_id_number(id_input.value.strip(), brain_df_current, out_error)
         diagnosis = diagnosis_dropdown.value
 
         z_data, compare_brain_data = zscore_subject(id_number, brain_df_current, behavior_df, diagnosis)
@@ -308,7 +318,8 @@ def interactive_brain_zscore_plot(brain_df, behavior_df):
             print_diagnoses = print_diagnoses.replace('Other', f'Other (note: {other_note})')
 
         with out_brain:
-            display(Markdown(f'    {id_number} Dyslexia Center Diagnosis: {print_diagnoses}'))
+            display(HTML(f'<h3 style="color: #878D96;">{id_number} Dyslexia Center Diagnosis:<br>{print_diagnoses}</h3>'))
+            # display(Markdown(f'    {id_number} Dyslexia Center Diagnosis: {print_diagnoses}'))
             # display(behavior_df[behavior_df['ID Number'] == id_number]['Other:']) ###
             display(brain_widget)
 
@@ -316,7 +327,7 @@ def interactive_brain_zscore_plot(brain_df, behavior_df):
         """Action when the 'Plot Threshold' button is clicked."""
         dtype = data_type_selector.value
         brain_df_current = get_dataframe(brain_df, dtype)
-        id_number = validate_id_number(id_input.value.strip(), brain_df_current)
+        id_number = validate_id_number(id_input.value.strip(), brain_df_current, out_error)
         thresh_value = thresh_input.value
         z_data, compare_brain_data = zscore_subject(id_number, brain_df_current, behavior_df, diagnosis_dropdown.value)
         
@@ -341,6 +352,7 @@ def interactive_brain_zscore_plot(brain_df, behavior_df):
     # Display the widgets
     # display(Markdown('## Enter an ID number, group of comparison subjects, and metric type.'))
     display(widgets.HBox([id_input, diagnosis_dropdown, data_type_selector, plot_brain_button]))
+    display(out_error)
     display(out_brain)
 
     # Display widgets
@@ -348,5 +360,4 @@ def interactive_brain_zscore_plot(brain_df, behavior_df):
     display(widgets.HBox([thresh_input, plot_thresh_button]))
     # display(out_bar)
     display(widgets.VBox([out_bar]))
-    display(out_table)            
-
+    display(out_table)  

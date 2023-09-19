@@ -7,7 +7,8 @@ import ipywidgets as widgets
 from IPython.display import display, clear_output, Markdown
 import seaborn as sns
 
-from pynteractive.importer import import_dataframe, read_csv_as_list
+from ucsfneuroviz.importer import import_dataframe, read_csv_as_list
+from ucsfneuroviz.interactive_brain_plots import activate_selected_font, validate_id_number
 
 # Global variable to store the color mapping for each group.
 group_color_mapping = {}
@@ -316,54 +317,68 @@ def interactive_radar(df, groupby_col, FC_vars):
         filtered_df = df[df[groupby_col].isin(group)]
         plot_radar(filtered_df, FC_vars, groupby_col, group)
 
+def get_key(my_dict, value):
+    for key, val in my_dict.items():
+        if val == value:
+            return key
+    return None
 
-def create_plot(df, compare_behav_data, id_number, dtype, task):
+def create_plot(df, compare_behav_data, id_number, FC_vars, task):
     """Generate scatter and distribution plots for a specific region."""
     # df = get_dataframe(dtype)
     task_data = compare_behav_data[task]
-    subject_data = df[df['id_number'] == id_number][task].values[0]
+    subject_data = df[df['ID Number'] == id_number][task].values[0]
 
     fig, ax = plt.subplots(1, 2, figsize=(10, 5), gridspec_kw={'width_ratios': [2, 3]})
     sns.boxplot(y=task_data, ax=ax[0], color='lightgray', showfliers=False)
     sns.stripplot(y=task_data, jitter=0.3, size=3, ax=ax[0], alpha=0.6)
     ax[0].scatter(x=0, y=subject_data, color='red', s=50, label=f'Subject {id_number}: Val={subject_data:.2f}')
-    ax[0].set_title(f'Distribution of {region}')
-    ax[0].set_ylabel(dtype)
+    ax[0].set_title(f'Distribution of {get_key(FC_vars, task)}')
+    ax[0].set_ylabel('Percentile')
     ax[0].set_xticks([])
     ax[0].set_xlabel('Subjects')
     ax[0].legend()
     sns.kdeplot(task_data, ax=ax[1], shade=True)
     z_val = (subject_data - task_data.mean()) / task_data.std()
     ax[1].axvline(x=subject_data, color='r', linestyle='--', label=f'Subject {id_number}: Z={z_val:.2f}')
-    ax[1].set_title(f'Kernel Density Estimation of {region}')
-    ax[1].set_xlabel(dtype)
+    ax[1].set_title(f'KDE of {get_key(FC_vars, task)}')
+    ax[1].set_xlabel('Percentile')
     ax[1].legend()
     plt.tight_layout()
     return fig
 
-def create_interactive_table(df, compare_behav_data, id_number, perc_data, dtype, thresh, out_plot):
+def create_interactive_table(df, compare_behav_data, id_number, FC_vars,  out_plot):
     """Generate an interactive table for regions with Z-scores above the threshold."""
-    # prominent_regions = [col for col in z_data.columns if z_data[col].abs().mean() > thresh]
-    # perc_data_sorted = sorted(perc_data.columns, key=lambda x: perc_data[x].mean(), reverse=True)
-
-    task_selector = widgets.Select(options=perc_data.columns, description='Region:', rows=25)
+    
+    # Create a list of tuples with keys as labels and values as the actual values
+    options_list = [(key, value) for key, value in FC_vars.items()]
+    
+    task_selector = widgets.Select(options=options_list, description='Region:', rows=25)
     task_selector.layout.width = '400px'
   
-    def on_region_selected(change):
-        task = change['new']
-        fig = create_plot(df, compare_behav_data, id_number, dtype, task)
+    def on_task_selected(change):
+        task = change['new']  # This will now be the value, not the key
+        fig = create_plot(df, compare_behav_data, id_number, FC_vars, task)
         with out_plot:
             out_plot.clear_output(wait=True)
             display(fig)
 
     task_selector.observe(on_task_selected, names='value')
 
-    # Trigger the initial plot
-    on_task_selected({'new': perc_data.columns[0]})
+    # Trigger the initial plot using the first value from the dictionary
+    on_task_selected({'new': list(FC_vars.values())[0]})
 
     return task_selector
 
 def interactive_individual_line_plot(df, id_col, groupby_col, FC_vars):
+
+    activate_selected_font('EB Garamond', 'EBGaramond-Regular.ttf')
+
+    # Create an Output widget
+    out_line = widgets.Output()
+    out_table = widgets.Output()
+    out_plot = widgets.Output()
+
     # Dropdown for comparison group selection
     comparison_selector = widgets.Dropdown(
         options=sorted([x for x in df[groupby_col].unique() if isinstance(x, str)]) + ['All Children'],
@@ -407,10 +422,6 @@ def interactive_individual_line_plot(df, id_col, groupby_col, FC_vars):
         button_style='', 
         tooltip='Click to plot'
     )
-    
-    # Create an Output widget
-    out_line = widgets.Output()
-    out_table = widgets.Output()
 
     # Function to update the plot
     def update_plot(button):
@@ -472,7 +483,8 @@ def interactive_individual_line_plot(df, id_col, groupby_col, FC_vars):
             display(fig)
 
         # Display the interactive table and the initial box plot and kde plot
-        region_selector = create_interactive_table(df[list(FC_vars.values())], compare_brain_data, id_number, z_data, dtype, thresh_value, out_plot)
+        perc_data = df[df['ID Number']==int(id_input.value)][list(FC_vars.values())]
+        region_selector = create_interactive_table(df, comparison_data, int(id_input.value), FC_vars, out_plot)
         with out_table:                          
             out_table.clear_output(wait=True)
             display(widgets.HBox([region_selector, out_plot]))
@@ -483,4 +495,5 @@ def interactive_individual_line_plot(df, id_col, groupby_col, FC_vars):
     # Display the widgets
     # display(Markdown('## Enter an ID number and group of comparison subjects to compare behavioral scores.'))
     display(widgets.HBox([id_input, comparison_selector, sem_toggle, std_toggle, plot_button]))
-    display(widgets.VBox([out]))  # Display the Output widget below your other widgets
+    display(widgets.VBox([out_line]))  # Display the Output widget below your other widgets
+    display(out_table)  # Display the Output widget below your other widgets

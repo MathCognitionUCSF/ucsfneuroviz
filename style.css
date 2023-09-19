@@ -57,6 +57,11 @@ h3 {
     font-size: 1.2em;
 }
 
+input[type="text"], input[type="number"], textarea {
+    font-family: 'EB Garamond', serif;
+    font-weight: 400;
+}
+
 /* Widgets styling */
 .widget-box {
     background-color: #fff;
