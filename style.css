@@ -1,17 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;700&display=swap');
-/* @font-face {
-    font-family: 'Garamond';
-    src: url('fonts/EBGaramond-VariableFont_wght.woff2') format('woff2'),
-         url('fonts/EBGaramond-VariableFont_wght.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-} */
-
-/* Reset some default browser margins
-body, h1, h2, h3, p {
-    margin: 0;
-    padding: 0;
-} */
 
 body {
     font-family: 'EB Garamond', serif;

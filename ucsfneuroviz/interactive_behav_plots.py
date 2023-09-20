@@ -13,7 +13,6 @@ from ucsfneuroviz.interactive_brain_plots import activate_selected_font, validat
 # Global variable to store the color mapping for each group.
 group_color_mapping = {}
 
-
 def get_distinct_colors(n):
     """
     Returns n equally spaced colors from the HSV colormap in RGBA format.
@@ -381,7 +380,7 @@ def interactive_individual_line_plot(df, id_col, groupby_col, FC_vars):
 
     # Dropdown for comparison group selection
     comparison_selector = widgets.Dropdown(
-        options=sorted([x for x in df[groupby_col].unique() if isinstance(x, str)]) + ['All Children'],
+        options= ['All Children'] + sorted([x for x in df[groupby_col].unique() if isinstance(x, str)]),
         value='All Children',
         description='Compare to:',
         disabled=False

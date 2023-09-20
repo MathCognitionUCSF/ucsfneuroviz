@@ -37,7 +37,7 @@ def get_subject_DC_diagnosis(id_number, behavior_df):
     DC_diagnoses = [diagnosis.replace('(e.g. LEE-GT {diagnosis_other}', '') for diagnosis in DC_diagnoses]
     # If they have dyslexia, get the primary phenotype
     if 'Dyslexia' in DC_diagnoses:
-        primary_phenotype = behavior_df[behavior_df['ID Number'] == id_number]['diagnosis_dyslexia_phenotype'].values[0]
+        primary_phenotype = behavior_df[behavior_df['ID Number'] == id_number]['Dyslexia Phenotype'].values[0]
     else:
         primary_phenotype = ''
     if 'Other' in DC_diagnoses:
@@ -88,9 +88,9 @@ def extract_diagnoses(df):
     for col in df.columns:
         if 'Dyslexia Center Diagnosis: (choice=' in col:
             # diagnosis = col.split('=')[-1].replace(')', '')
-            diagnoses.append(diagnosis)
+            diagnoses.append(col)
     # Append to the front, so that 'All Children' is the first option
-    diagnoses.insert(0, 'All Children')
+    # diagnoses.insert(0, 'All Children')
     return diagnoses
 
 def zscore_subject(id_number, brain_df, behavior_df, col, value):
@@ -118,8 +118,6 @@ def zscore_subject(id_number, brain_df, behavior_df, col, value):
     compare_means = np.mean(compare_brain_data, axis=0)
     compare_stds = np.std(compare_brain_data, axis=0)
     zscores = pd.DataFrame((patient_df - compare_means) / compare_stds)
-    # display(zscores)
-    # display(compare_brain_data)
 
     return zscores, compare_brain_data
 
@@ -236,7 +234,8 @@ def create_interactive_table(df, compare_brain_data, id_number, z_data, dtype, t
 
     return region_selector
 
-def interactive_brain_zscore_plot(brain_df, behavior_df):
+
+def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns):
 
     activate_selected_font('EB Garamond', 'EBGaramond-Regular.ttf')
 
@@ -248,13 +247,22 @@ def interactive_brain_zscore_plot(brain_df, behavior_df):
     out_plot = widgets.Output()
     out_error = widgets.Output()
     
+    # Dropdown for diagnosis type selection
+    diagnosis_type_dropdown = widgets.Dropdown(
+        options=['All Children'] + diagnosis_columns,  # Add other diagnosis types here
+        description='Diagnosis Type:',
+        value='All Children',  # Set default value
+        disabled=False,
+    )
+
     # Dropdown for diagnosis selection
     diagnosis_dropdown = widgets.Dropdown(
-        options=extract_diagnoses(behavior_df),
+        options=['All Children'],  # Initially, only "All Children" is available
         description='Compare to:',
+        value='All Children',  # Set default value
         disabled=False
     )
-    
+
     # Textbox for user to enter ID
     id_input = widgets.Text(
         value='',
@@ -297,15 +305,28 @@ def interactive_brain_zscore_plot(brain_df, behavior_df):
         tooltip='Click to plot regions with z-scores above the threshold'
     )
 
+    def update_diagnosis_options(change):
+        new_type = change['new']
+        if new_type == 'All Children':
+            diagnosis_dropdown.options = ['All Children']
+            diagnosis_dropdown.value = 'All Children'
+        else:
+            unique_vals = list(behavior_df[new_type].dropna().unique())
+            diagnosis_dropdown.options = unique_vals
+            diagnosis_dropdown.value = unique_vals[0] if unique_vals else None
+
+    # Observe changes in diagnosis type dropdown and update diagnosis options accordingly
+    diagnosis_type_dropdown.observe(update_diagnosis_options, names='value')
+
     # Update function
     def update_brain_plot(button):
         out_brain.clear_output(wait=True) # Clear the output widget
         dtype = data_type_selector.value
         brain_df_current = get_dataframe(brain_df, dtype)
         id_number = validate_id_number(id_input.value.strip(), brain_df_current, out_error)
-        diagnosis = diagnosis_dropdown.value
+        # diagnosis = diagnosis_dropdown.value
 
-        z_data, compare_brain_data = zscore_subject(id_number, brain_df_current, behavior_df, diagnosis)
+        z_data, compare_brain_data = zscore_subject(id_number, brain_df_current, behavior_df, diagnosis_type_dropdown.value, diagnosis_dropdown.value)
         brain_widget = refactored_plot_brain(z_data)
 
         DC_diagnoses, primary_phenotype, other_note = get_subject_DC_diagnosis(id_number, behavior_df)
@@ -329,7 +350,7 @@ def interactive_brain_zscore_plot(brain_df, behavior_df):
         brain_df_current = get_dataframe(brain_df, dtype)
         id_number = validate_id_number(id_input.value.strip(), brain_df_current, out_error)
         thresh_value = thresh_input.value
-        z_data, compare_brain_data = zscore_subject(id_number, brain_df_current, behavior_df, diagnosis_dropdown.value)
+        z_data, compare_brain_data = zscore_subject(id_number, brain_df_current, behavior_df, diagnosis_type_dropdown.value, diagnosis_dropdown.value)
         
         # Display the bar plot
         barplot = plot_bar_for_thresholded_regions(z_data, dtype, thresh_value)
@@ -351,7 +372,7 @@ def interactive_brain_zscore_plot(brain_df, behavior_df):
 
     # Display the widgets
     # display(Markdown('## Enter an ID number, group of comparison subjects, and metric type.'))
-    display(widgets.HBox([id_input, diagnosis_dropdown, data_type_selector, plot_brain_button]))
+    display(widgets.HBox([id_input, diagnosis_type_dropdown, diagnosis_dropdown, data_type_selector, plot_brain_button]))
     display(out_error)
     display(out_brain)
 
