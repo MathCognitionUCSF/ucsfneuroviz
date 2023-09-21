@@ -4,11 +4,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import ipywidgets as widgets
-from IPython.display import display, clear_output, Markdown
+from IPython.display import display, clear_output, Markdown, HTML
 import seaborn as sns
 
 from ucsfneuroviz.importer import import_dataframe, read_csv_as_list
-from ucsfneuroviz.interactive_brain_plots import activate_selected_font, validate_id_number
+from ucsfneuroviz.interactive_brain_plots import activate_selected_font, validate_id_number, extract_dc_diagnoses
 
 # Global variable to store the color mapping for each group.
 group_color_mapping = {}
@@ -369,8 +369,9 @@ def create_interactive_table(df, compare_behav_data, id_number, FC_vars,  out_pl
 
     return task_selector
 
-def interactive_individual_line_plot(df, id_col, groupby_col, FC_vars):
-
+def interactive_individual_line_plot(df, id_col, diagnosis_columns, FC_vars):
+    
+    display(HTML(f'<h3 style="color: #052049;">Plot percentiles for behavioral tasks comparing the current participant to a selected group of participants.<br></h3>'))
     activate_selected_font('EB Garamond', 'EBGaramond-Regular.ttf')
 
     # Create an Output widget
@@ -378,14 +379,29 @@ def interactive_individual_line_plot(df, id_col, groupby_col, FC_vars):
     out_table = widgets.Output()
     out_plot = widgets.Output()
 
-    # Dropdown for comparison group selection
-    comparison_selector = widgets.Dropdown(
-        options= ['All Children'] + sorted([x for x in df[groupby_col].unique() if isinstance(x, str)]),
-        value='All Children',
+    # # Dropdown for comparison group selection
+    # comparison_selector = widgets.Dropdown(
+    #     options= ['All Children'] + sorted([x for x in df[groupby_col].unique() if isinstance(x, str)]),
+    #     value='All Children',
+    #     description='Compare to:',
+    #     disabled=False
+    # )
+    
+    # Dropdown for diagnosis type selection
+    diagnosis_type_dropdown = widgets.Dropdown(
+        options=['All Children', 'Dyslexia Center Diagnosis'] + diagnosis_columns,  # Add other diagnosis types here
+        description='Diagnosis Type:',
+        value='All Children',  # Set default value
+        disabled=False,
+    )
+
+    # Dropdown for diagnosis selection
+    diagnosis_dropdown = widgets.Dropdown(
+        options=['All Children'],  # Initially, only "All Children" is available
         description='Compare to:',
+        value='All Children',  # Set default value
         disabled=False
     )
-    
     # Textbox for user to enter ID
     id_input = widgets.Text(
         value='',
@@ -422,17 +438,40 @@ def interactive_individual_line_plot(df, id_col, groupby_col, FC_vars):
         tooltip='Click to plot'
     )
 
+    def update_diagnosis_options(change):
+        new_type = change['new']
+        if new_type == 'All Children':
+            diagnosis_dropdown.options = ['All Children']
+            diagnosis_dropdown.value = 'All Children'
+        elif new_type == 'Dyslexia Center Diagnosis':
+            unique_vals = extract_dc_diagnoses(df)
+            diagnosis_dropdown.options = unique_vals
+            diagnosis_dropdown.value = unique_vals[0] if unique_vals else None
+        else:
+            unique_vals = list(df[new_type].dropna().unique())
+            diagnosis_dropdown.options = unique_vals
+            diagnosis_dropdown.value = unique_vals[0] if unique_vals else None
+
+    # Observe changes in diagnosis type dropdown and update diagnosis options accordingly
+    diagnosis_type_dropdown.observe(update_diagnosis_options, names='value')
+
     # Function to update the plot
     def update_plot(button):
         # Get the individual's data
         individual_data = df[df[id_col] == int(id_input.value)][list(FC_vars.values())].iloc[0]
         
         # Get the comparison group data
-        if comparison_selector.value == 'All Children':
-            comparison_data = df[list(FC_vars.values())]
+        if diagnosis_type_dropdown.value == 'All Children':
+            compare_data = df[list(FC_vars.values())]
+        elif diagnosis_type_dropdown.value == 'Dyslexia Center Diagnosis':
+
+            compare_subjects = df[df['Dyslexia Center Diagnosis: (choice=' + diagnosis_dropdown.value + ')'] == "Checked"]['ID Number']
+            compare_data = df[df['ID Number'].isin(compare_subjects)][list(FC_vars.values())]
+
         else:
-            comparison_data = df[df[groupby_col] == comparison_selector.value][list(FC_vars.values())]
-        
+            compare_subjects = df[df[diagnosis_type_dropdown.value] == diagnosis_dropdown.value]['ID Number']
+            compare_data = df[df['ID Number'].isin(compare_subjects)][list(FC_vars.values())]
+
         # Plotting
         fig, ax = plt.subplots(figsize=(24, 12))
         
@@ -440,21 +479,21 @@ def interactive_individual_line_plot(df, id_col, groupby_col, FC_vars):
         ax.plot(list(FC_vars.values()), individual_data, marker='o', lw=4, color='blue', label=f"Individual {id_input.value}")
         
         # Plot comparison group mean with grey color
-        comparison_mean = comparison_data.mean()
+        comparison_mean = compare_data.mean()
         comparison_color = 'grey'
 
-        ax.plot(list(FC_vars.values()), comparison_mean, marker='o', lw=3, color=comparison_color, label=f"Mean of {comparison_selector.value}")
+        ax.plot(list(FC_vars.values()), comparison_mean, marker='o', lw=3, color=comparison_color, label=f"Mean of {diagnosis_dropdown.value}")
         
         # Adding shaded region for SEM or STD in grey
         if sem_toggle.value:
-            sem = comparison_data.sem()
+            sem = compare_data.sem()
             ax.fill_between(list(FC_vars.values()), 
                             comparison_mean - sem, 
                             comparison_mean + sem, 
                             color=comparison_color,
                             alpha=0.2)
         elif std_toggle.value:
-            std = comparison_data.std()
+            std = compare_data.std()
             ax.fill_between(list(FC_vars.values()), 
                             comparison_mean - std, 
                             comparison_mean + std, 
@@ -483,7 +522,7 @@ def interactive_individual_line_plot(df, id_col, groupby_col, FC_vars):
 
         # Display the interactive table and the initial box plot and kde plot
         perc_data = df[df['ID Number']==int(id_input.value)][list(FC_vars.values())]
-        region_selector = create_interactive_table(df, comparison_data, int(id_input.value), FC_vars, out_plot)
+        region_selector = create_interactive_table(df, compare_data, int(id_input.value), FC_vars, out_plot)
         with out_table:                          
             out_table.clear_output(wait=True)
             display(widgets.HBox([region_selector, out_plot]))
@@ -493,6 +532,6 @@ def interactive_individual_line_plot(df, id_col, groupby_col, FC_vars):
     
     # Display the widgets
     # display(Markdown('## Enter an ID number and group of comparison subjects to compare behavioral scores.'))
-    display(widgets.HBox([id_input, comparison_selector, sem_toggle, std_toggle, plot_button]))
+    display(widgets.HBox([id_input, diagnosis_type_dropdown, diagnosis_dropdown, sem_toggle, std_toggle, plot_button]))
     display(widgets.VBox([out_line]))  # Display the Output widget below your other widgets
     display(out_table)  # Display the Output widget below your other widgets

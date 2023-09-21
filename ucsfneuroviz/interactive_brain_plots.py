@@ -25,7 +25,7 @@ def activate_selected_font(font_name, font_file_name):
     plt.rcParams['font.family'] = font_name
 
 # Helper functions
-def get_subject_DC_diagnosis(id_number, behavior_df):
+def get_subject_dc_diagnosis(id_number, behavior_df):
     """Returns the Dyslexia Center diagnosis, primary phenotype, and other diagnosis notes of the subject with the given ID number."""
     # Get all vars that start with 'Dyslexia Center Diagnosis'
     DC_diagnosis_vars = [col for col in behavior_df.columns if col.startswith('Dyslexia Center Diagnosis')]
@@ -83,14 +83,16 @@ def validate_id_number(id_number_str, df, out_error):
             out_error.clear_output(wait=True)  # Clear the error if the new ID is valid
         return np.int64(id_number_str)
 
-def extract_diagnoses(df):
+def extract_dc_diagnoses(df):
     diagnoses = []
     for col in df.columns:
         if 'Dyslexia Center Diagnosis: (choice=' in col:
-            # diagnosis = col.split('=')[-1].replace(')', '')
-            diagnoses.append(col)
-    # Append to the front, so that 'All Children' is the first option
-    # diagnoses.insert(0, 'All Children')
+            diagnosis = col.split('=')[-1]
+            # replace the very last parenthesis with nothing
+            diagnosis = diagnosis[::-1].replace(')', '', 1)[::-1]
+            # remove the stuff in curly braces
+            # diagnosis = diagnosis.split('{')[0].strip()
+            diagnoses.append(diagnosis)
     return diagnoses
 
 def zscore_subject(id_number, brain_df, behavior_df, col, value):
@@ -99,16 +101,20 @@ def zscore_subject(id_number, brain_df, behavior_df, col, value):
     z-score for each region of the subject with the given ID number compared to the mean and standard deviation of the given diagnosis group
     compare_brain_data: brain data for the given diagnosis group"""
     # Construct the column name based on diagnosis
-    if col != 'All Children':
-    
+    if col == 'All Children':
+        compare_brain_data = brain_df.copy()
+    elif col == 'Dyslexia Center Diagnosis':
+        # Get subjects from the behavioral dataframe based on the selected diagnosis
+        compare_subjects = behavior_df[behavior_df['Dyslexia Center Diagnosis: (choice=' + value + ')'] == "Checked"]['ID Number'].tolist()
+        # Filter the brain data dataframe based on these subjects
+        compare_brain_data = brain_df[brain_df['id_number'].isin(compare_subjects)]
+        
+    else:
         # Get subjects from the behavioral dataframe based on the selected diagnosis
         compare_subjects = behavior_df[behavior_df[col] == value]['ID Number'].tolist()
     
         # Filter the brain data dataframe based on these subjects
-        compare_brain_data = brain_df[brain_df['id_number'].isin(compare_subjects)]
-
-    else:
-        compare_brain_data = brain_df.copy()
+        compare_brain_data = brain_df[brain_df['id_number'].isin(compare_subjects)]  
     
     # Ensure we exclude the patient data from compare data
     compare_brain_data = compare_brain_data[compare_brain_data['id_number'] != id_number].drop(columns=['id_number'])
@@ -157,9 +163,12 @@ def plot_hemisphere(hemi, z_data, global_vmin, global_vmax):
         region_idx = names.index(label)
         mapped_values[labels == region_idx] = value
 
+
+    # Create the surface plot
     view = plotting.view_surf(getattr(fsaverage, HEMI_CONFIG[hemi]['fsavg']), mapped_values,
-                              cmap='coolwarm', symmetric_cmap=True,
-                              vmax=np.max([np.abs(global_vmin), np.abs(global_vmax)]))
+                            cmap='coolwarm', symmetric_cmap=True,
+                            vmax=np.max([np.abs(global_vmin), np.abs(global_vmax)]))
+    
     return widgets.HTML(view.get_iframe())  # Return the widget
 
 def refactored_plot_brain(z_data):
@@ -234,9 +243,9 @@ def create_interactive_table(df, compare_brain_data, id_number, z_data, dtype, t
 
     return region_selector
 
-
 def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns):
 
+    display(HTML(f'<h3 style="color: #052049;">Plot z-scores on a cortical surface comparing the current participant to a selected group of participants.<br></h3>'))
     activate_selected_font('EB Garamond', 'EBGaramond-Regular.ttf')
 
     # Output widgets
@@ -249,7 +258,7 @@ def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns):
     
     # Dropdown for diagnosis type selection
     diagnosis_type_dropdown = widgets.Dropdown(
-        options=['All Children'] + diagnosis_columns,  # Add other diagnosis types here
+        options=['All Children', 'Dyslexia Center Diagnosis'] + diagnosis_columns,  # Add other diagnosis types here
         description='Diagnosis Type:',
         value='All Children',  # Set default value
         disabled=False,
@@ -266,7 +275,7 @@ def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns):
     # Textbox for user to enter ID
     id_input = widgets.Text(
         value='',
-        placeholder='Enter ID number',
+        placeholder='Enter ID Number',
         description='ID Number:',
         disabled=False,  
         layout={'width': 'max-content'}
@@ -310,6 +319,10 @@ def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns):
         if new_type == 'All Children':
             diagnosis_dropdown.options = ['All Children']
             diagnosis_dropdown.value = 'All Children'
+        elif new_type == 'Dyslexia Center Diagnosis':
+            unique_vals = extract_dc_diagnoses(behavior_df)
+            diagnosis_dropdown.options = unique_vals
+            diagnosis_dropdown.value = unique_vals[0] if unique_vals else None
         else:
             unique_vals = list(behavior_df[new_type].dropna().unique())
             diagnosis_dropdown.options = unique_vals
@@ -329,7 +342,7 @@ def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns):
         z_data, compare_brain_data = zscore_subject(id_number, brain_df_current, behavior_df, diagnosis_type_dropdown.value, diagnosis_dropdown.value)
         brain_widget = refactored_plot_brain(z_data)
 
-        DC_diagnoses, primary_phenotype, other_note = get_subject_DC_diagnosis(id_number, behavior_df)
+        DC_diagnoses, primary_phenotype, other_note = get_subject_dc_diagnosis(id_number, behavior_df)
         print_diagnoses = ', '.join(DC_diagnoses)
         if 'Dyslexia' in print_diagnoses:
             # Insert "(primary phenotype: primary_phenotype)" after "Dyslexia"
