@@ -18,7 +18,7 @@ h2, h3 {
 }
 
 h1 {
-    position: sticky;
+    /* position: sticky; */
     top: 0;
     margin: 0px
     font-size: 2.5em;
@@ -29,6 +29,8 @@ h1 {
     text-align: center;
     padding-top: 20px;
     padding-bottom: 20px;
+    padding-left: 0px;
+    padding-right: 0px;
     width: 100%;
 }
 
