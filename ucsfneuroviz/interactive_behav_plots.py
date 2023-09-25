@@ -435,7 +435,8 @@ def interactive_individual_line_plot(df, id_col, diagnosis_columns, FC_vars):
         description='Plot Line',
         disabled=False,
         button_style='', 
-        tooltip='Click to plot'
+        tooltip='Click to plot',
+        icon='check'
     )
 
     def update_diagnosis_options(change):

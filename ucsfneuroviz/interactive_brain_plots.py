@@ -288,7 +288,8 @@ def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns):
         disabled=False,
         value='Gray Matter Volume',
         # make it narrower so it doesn't take up the whole screen
-        layout={'width': 'max-content'}
+        # layout={'width': 'max-content'}
+        layout=widgets.Layout(padding='0 0 0 15px', width='max-content')
     )
 
     # Button to trigger the brain plotting
@@ -296,7 +297,8 @@ def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns):
         description='Plot Brain',
         disabled=False,
         button_style='', 
-        tooltip='Click to plot z-scores on the brain'
+        tooltip='Click to plot z-scores on the brain',
+        icon='check'
     )
 
     # Widgets for user inputs
@@ -311,7 +313,8 @@ def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns):
         description='Plot Regions',
         disabled=False,
         button_style='', 
-        tooltip='Click to plot regions with z-scores above the threshold'
+        tooltip='Click to plot regions with z-scores above the threshold',
+        icon='check'
     )
 
     def update_diagnosis_options(change):
