@@ -67,7 +67,7 @@ input[type="text"], input[type="number"], textarea {
 }
 
 /* Target the Jupyter widgets tab */
-body .jupyter-widgets.widget-tab > .p-TabBar .p-TabBar-tabLabel {
+.jupyter-widgets.widget-tab > .p-TabBar .p-TabBar-tabLabel {
     font-family: 'EB Garamond', serif !important;
     font-weight: 400 !important;
 }
