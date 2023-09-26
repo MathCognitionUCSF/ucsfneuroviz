@@ -60,18 +60,17 @@ input[type="text"], input[type="number"], textarea {
     box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1);
 } */
 
-
 /* Make the widget tabs have Garamond font */
-.widget-tabs {
+.widget-tab {
     font-family: 'EB Garamond', serif;
     font-weight: 400;
 }
 
 /* Target the Jupyter widgets tab */
-.p-TabBar-tab {
-    font-family: "Garamond", serif !important;
+body .jupyter-widgets.widget-tab > .p-TabBar .p-TabBar-tabLabel {
+    font-family: 'EB Garamond', serif !important;
+    font-weight: 400 !important;
 }
-
 
 
 /* For figures and plots */
