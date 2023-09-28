@@ -108,7 +108,7 @@ button:hover {
 }
 
 /* Add space between widgets for better visual separation */
-.widget-label, .widget-text, .widget-dropdown, .widget-button {
+.widget-label, .widget-text, .widget-dropdown, .widget-button .widget-password {
     font-family: 'EB Garamond', serif;
     font-weight: 400;
     margin-bottom: 10px;
