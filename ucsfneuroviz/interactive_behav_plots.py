@@ -8,7 +8,7 @@ from IPython.display import display, clear_output, Markdown, HTML
 import seaborn as sns
 
 from ucsfneuroviz.importer import import_dataframe, read_csv_as_list
-from ucsfneuroviz.interactive_brain_plots import activate_selected_font, validate_id_number, extract_dc_diagnoses
+from ucsfneuroviz.interactive_struct_plots import activate_selected_font, validate_id_number, extract_dc_diagnoses
 
 # Global variable to store the color mapping for each group.
 group_color_mapping = {}
