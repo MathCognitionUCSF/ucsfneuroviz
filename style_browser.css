@@ -11,6 +11,39 @@ body {
     /* width: 100%; */
 }
 
+/*Define styling for links*/
+a:link {
+    font-family: 'EB Garamond', serif;
+    font-weight: 400;
+    color: #0F388A;
+    text-decoration: none;
+}
+
+a:visited {
+    font-family: 'EB Garamond', serif;
+    font-weight: 400;
+    color: #178CCB;
+    text-decoration: none;
+}
+
+/*Define styling for the tabs*/
+.tab {
+    font-family: 'EB Garamond', serif;
+    font-weight: 400;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+    margin-bottom: 20px;
+}
+
+/* Change the font of the tab widget label */
+.jupyter-widgets.widget-tab .p-TabBar[data-orientation='horizontal'] .p-TabBar-content .p-TabBar-tabLabel {
+    font-family: 'EB Garamond', serif !important;
+    font-weight: 400 !important;
+    color: #0F388A !important;
+}
+
+
 h2, h3 {
     font-family: 'EB Garamond', serif;
     font-weight: 700;
@@ -66,18 +99,6 @@ input[type="text"], input[type="number"], textarea {
     margin: 20px 0;
     /* box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1); */
 }
-
-/* Header styling
-.sticky-header {
-    position: sticky;
-    top: 0;
-    background-color: #052049;
-    color: white;
-    z-index: 1000;
-    text-align: center;
-    padding: 10px;
-    font-size: 2em;
-} */
 
 img, svg {
     max-width: 100%; /* Make images responsive */
