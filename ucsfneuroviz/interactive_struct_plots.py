@@ -73,7 +73,7 @@ def validate_id_number(id_number_str, df, out_error):
             out_error.clear_output(wait=True)
             display(HTML('<h3 style="color: red;">Error: Please enter a 5-digit number for the ID number.</h3>'))
         return None
-    elif int(id_number_str) not in df['id_number'].values:
+    elif int(id_number_str) not in df['ID Number'].values:
         with out_error:
             out_error.clear_output(wait=True)
             display(HTML('<h3 style="color: red;">Error: The ID number you entered does not exist.</h3>'))
@@ -243,7 +243,7 @@ def create_interactive_table(df, compare_brain_data, id_number, z_data, dtype, t
 
     return region_selector
 
-def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns):
+def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns, subject_id, date):
 
     display(HTML(f'<h3 style="color: #052049;">Plot z-scores on a cortical surface comparing the current participant to a selected group of participants.<br></h3>'))
     activate_selected_font('EB Garamond', 'EBGaramond-Regular.ttf')
@@ -254,7 +254,7 @@ def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns):
     out_bar = widgets.Output()
     out_bar.add_class('bar-plot-container')
     out_plot = widgets.Output()
-    out_error = widgets.Output()
+    # out_error = widgets.Output()
     
     # Dropdown for diagnosis type selection
     diagnosis_type_dropdown = widgets.Dropdown(
@@ -272,14 +272,14 @@ def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns):
         disabled=False
     )
 
-    # Textbox for user to enter ID
-    id_input = widgets.Text(
-        value='',
-        placeholder='Enter ID Number',
-        description='ID Number:',
-        disabled=False,  
-        layout={'width': 'max-content'}
-    )
+    # # Textbox for user to enter ID
+    # id_input = widgets.Text(
+    #     value='',
+    #     placeholder='Enter ID Number',
+    #     description='ID Number:',
+    #     disabled=False,  
+    #     layout={'width': 'max-content'}
+    # )
     
     # Radio buttons for data type selection
     data_type_selector = widgets.RadioButtons(
@@ -339,13 +339,13 @@ def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns):
         out_brain.clear_output(wait=True) # Clear the output widget
         dtype = data_type_selector.value
         brain_df_current = get_dataframe(brain_df, dtype)
-        id_number = validate_id_number(id_input.value.strip(), brain_df_current, out_error)
+        # id_number = validate_id_number(subject_id, brain_df_current, out_error)
         # diagnosis = diagnosis_dropdown.value
 
-        z_data, compare_brain_data = zscore_subject(id_number, brain_df_current, behavior_df, diagnosis_type_dropdown.value, diagnosis_dropdown.value)
+        z_data, compare_brain_data = zscore_subject(subject_id, brain_df_current, behavior_df, diagnosis_type_dropdown.value, diagnosis_dropdown.value)
         brain_widget = refactored_plot_brain(z_data)
 
-        DC_diagnoses, primary_phenotype, other_note = get_subject_dc_diagnosis(id_number, behavior_df)
+        DC_diagnoses, primary_phenotype, other_note = get_subject_dc_diagnosis(subject_id, behavior_df)
         print_diagnoses = ', '.join(DC_diagnoses)
         if 'Dyslexia' in print_diagnoses:
             # Insert "(primary phenotype: primary_phenotype)" after "Dyslexia"
@@ -355,7 +355,7 @@ def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns):
             print_diagnoses = print_diagnoses.replace('Other', f'Other (note: {other_note})')
 
         with out_brain:
-            display(HTML(f'<h3 style="color: #878D96;">{id_number} Dyslexia Center Diagnosis:<br>{print_diagnoses}</h3>'))
+            display(HTML(f'<h3 style="color: #878D96;">{subject_id} Dyslexia Center Diagnosis:<br>{print_diagnoses}</h3>'))
             # display(Markdown(f'    {id_number} Dyslexia Center Diagnosis: {print_diagnoses}'))
             # display(behavior_df[behavior_df['ID Number'] == id_number]['Other:']) ###
             display(brain_widget)
@@ -364,9 +364,9 @@ def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns):
         """Action when the 'Plot Threshold' button is clicked."""
         dtype = data_type_selector.value
         brain_df_current = get_dataframe(brain_df, dtype)
-        id_number = validate_id_number(id_input.value.strip(), brain_df_current, out_error)
+        # id_number = validate_id_number(id_input.value.strip(), brain_df_current, out_error)
         thresh_value = thresh_input.value
-        z_data, compare_brain_data = zscore_subject(id_number, brain_df_current, behavior_df, diagnosis_type_dropdown.value, diagnosis_dropdown.value)
+        z_data, compare_brain_data = zscore_subject(subject_id, brain_df_current, behavior_df, diagnosis_type_dropdown.value, diagnosis_dropdown.value)
         
         # Display the bar plot
         barplot = plot_bar_for_thresholded_regions(z_data, dtype, thresh_value)
@@ -375,7 +375,7 @@ def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns):
             plt.show(barplot)
             
         # Display the interactive table and the initial box plot and kde plot
-        region_selector = create_interactive_table(brain_df_current, compare_brain_data, id_number, z_data, dtype, thresh_value, out_plot)
+        region_selector = create_interactive_table(brain_df_current, compare_brain_data, subject_id, z_data, dtype, thresh_value, out_plot)
         with out_table:                          
             out_table.clear_output(wait=True)
             display(widgets.HBox([region_selector, out_plot]))
@@ -388,8 +388,8 @@ def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns):
 
     # Display the widgets
     # display(Markdown('## Enter an ID number, group of comparison subjects, and metric type.'))
-    display(widgets.HBox([id_input, diagnosis_type_dropdown, diagnosis_dropdown, data_type_selector, plot_brain_button]))
-    display(out_error)
+    display(widgets.HBox([diagnosis_type_dropdown, diagnosis_dropdown, data_type_selector, plot_brain_button]))
+    # display(out_error)
     display(out_brain)
 
     # Display widgets
