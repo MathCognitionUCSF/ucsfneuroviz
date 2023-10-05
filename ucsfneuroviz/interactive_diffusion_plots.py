@@ -54,8 +54,6 @@ def calculate_average_fa_md(profiles_df, tract):
     return average_fa, average_md
 
 def calculate_laterality(slcount_df, tract):
-    # left_tract = f"{tract_base}_L"
-    # right_tract = f"{tract_base}_R"
 
     # If the tract name ends in _L, then the left tract is the tract name and the right tract is the tract name with _L replaced with _R
     if tract.endswith('_L'):
@@ -68,19 +66,12 @@ def calculate_laterality(slcount_df, tract):
     else:
         return None
 
-    # print(f"Left tract: {left_tract}") # delete later
-    # print(f"Right tract: {right_tract}") # delete later
-    # display(slcount_df[slcount_df['tractID'] == left_tract]) # delete later
-    # print("LOOK HERE:")
-    # print(slcount_df.columns)
-    # print(slcount_df[slcount_df['tractID'] == left_tract])
-
-
     left_count = slcount_df[slcount_df['tractID'] == left_tract]['n_streamlines_clean'].values[0]
     right_count = slcount_df[slcount_df['tractID'] == right_tract]['n_streamlines_clean'].values[0]
     laterality = (left_count - right_count) / (left_count + right_count)
 
     return laterality
+
 
 def get_metric_per_subject(data_df, metrict_type):
     # Takes in a dataframe of DTI metrics and returns the list of values for each subject in the dataframe
@@ -172,13 +163,13 @@ def generate_plots(sub_data_profiles, compare_data_profiles, sub_data_slcount, c
     subject_laterality = laterality_dict_sub.get(f"{tract} Laterality", None)
     
     # Generate plots
-    fig, ax = plt.subplots(3, 2, figsize=(10, 10), gridspec_kw={'width_ratios': [2, 3]})
+    fig, ax = plt.subplots(3, 2, figsize=(7, 7), gridspec_kw={'width_ratios': [2, 3]})
     
     metrics_list = [(compare_fa, subject_fa, 'FA', 'dti_fa'), (compare_md, subject_md, 'MD', 'dti_md'), (compare_laterality, subject_laterality, 'Laterality', None)]
     
     for i, (compare_metric, subject_metric, label, tract_metric_column) in enumerate(metrics_list):
         # Boxplot
-        sns.boxplot(y=compare_metric, ax=ax[i, 0], color='lightgray')
+        sns.boxplot(y=compare_metric, ax=ax[i, 0], color='lightgray', width=0.5)
         sns.stripplot(y=compare_metric, jitter=0.3, size=3, ax=ax[i, 0], alpha=0.6, s=5)
         if subject_metric is not None:  # Add this check to avoid plotting None
             ax[i, 0].scatter(x=0, y=subject_metric, color='red', s=50)
@@ -212,7 +203,7 @@ def generate_plots(sub_data_profiles, compare_data_profiles, sub_data_slcount, c
             handle_subject = mlines.Line2D([], [], color='red', label='Subject')
 
             # Apply custom legend
-            ax[i, 1].legend(handles=[handle_comp_group, handle_subject])
+            ax[i, 1].legend(handles=[handle_comp_group, handle_subject], loc='center left', bbox_to_anchor=(1, 0.5))
         else:
             # Leave this space completely blank
             ax[i, 1].axis('off')
@@ -244,7 +235,7 @@ def create_interactive_table_with_new_plots(sub_data_profiles, compare_data_prof
         tract_label = change['new']
         tract = tract_key_dict[tract_label]
         # Adding debug prints to understand the flow
-        print(f"Selected Tract: {tract}")
+        # print(f"Selected Tract: {tract}")
         
         fig = generate_plots(sub_data_profiles, compare_data_profiles, sub_data_slcount, compare_data_slcount, tract)
         with out_plot:
@@ -337,7 +328,7 @@ def interactive_dti_metrics(slcount_df, profiles_df, behavior_df, diagnosis_colu
     
     # Display widgets
     display(widgets.HBox([diagnosis_type_dropdown, diagnosis_dropdown, submit_button]))
-    
+
     # link the submit button to the update_sub_and_comparison_data function
     submit_button.on_click(update_sub_and_comparison_data)
     # Trigger intial plot for 'All Children' default dropdown selection

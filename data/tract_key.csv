@@ -1,24 +1,23 @@
 ﻿tractID,label
-ATR_L,ATR_L Anterior Thalamic Radiation - Left
-ATR_R,ATR_R Anterior Thalamic Radiation - Right
-CGC_L,CGC_L Cingulum Cingulate Gyrus - Left
-CGC_R,CGC_R Cingulum Cingulate Gyrus - Right
-CST_L,CST_L Corticospinal Tract  - Left
-CST_R,CST_R Corticospinal Tract  - Right
-IFO_L,IFO_L Inferior Fronto-Occipital Fasciculus  - Left
-IFO_R,IFO_R Inferior Fronto-Occipital Fasciculus  - Right
-ILF_L,ILF_L Inferior Longitudinal Fasciculus - Left
-ILF_R,ILF_R Inferior Longitudinal Fasciculus - Right
-SLF_L,SLF_L Superior Longitudinal Fasciculus - Left
-SLF_R,SLF_R Superior Longitudinal Fasciculus - Right
-ARC_L,ARC_L Arcuate Fasciculus  - Left
-ARC_R,ARC_R Arcuate Fasciculus  - Right
-UNC_L,UNC_L Uncinate Fasciculus - Left
-UNC_R,UNC_R Uncinate Fasciculus - Right
-FA,FA Forceps Anterior
-FP,FP Forceps Posterior
-pARC_L,pARC_L Posterior Arcuate - Left
-pARC_R,pARC_R Posterior Arcuate - Right
-VOF_L,VOF_L Vertical Occipital Fasciculus - Left
-VOF_R,VOF_R Vertical Occipital Fasciculus - Right
-whole_brain,Whole Brain
+ATR_L,ATR_L: Anterior Thalamic Radiation - Left
+ATR_R,ATR_R: Anterior Thalamic Radiation - Right
+CGC_L,CGC_L: Cingulum Cingulate Gyrus - Left
+CGC_R,CGC_R: Cingulum Cingulate Gyrus - Right
+CST_L,CST_L: Corticospinal Tract  - Left
+CST_R,CST_R: Corticospinal Tract  - Right
+IFO_L,IFO_L: Inferior Fronto-Occipital Fasciculus  - Left
+IFO_R,IFO_R: Inferior Fronto-Occipital Fasciculus  - Right
+ILF_L,ILF_L: Inferior Longitudinal Fasciculus - Left
+ILF_R,ILF_R: Inferior Longitudinal Fasciculus - Right
+SLF_L,SLF_L: Superior Longitudinal Fasciculus - Left
+SLF_R,SLF_R: Superior Longitudinal Fasciculus - Right
+ARC_L,ARC_L: Arcuate Fasciculus  - Left
+ARC_R,ARC_R: Arcuate Fasciculus  - Right
+UNC_L,UNC_L: Uncinate Fasciculus - Left
+UNC_R,UNC_R: Uncinate Fasciculus - Right
+FA,FA: Forceps Anterior
+FP,FP: Forceps Posterior
+pARC_L,pARC_L: Posterior Arcuate - Left
+pARC_R,pARC_R: Posterior Arcuate - Right
+VOF_L,VOF_L: Vertical Occipital Fasciculus - Left
+VOF_R,VOF_R: Vertical Occipital Fasciculus - Right
