@@ -379,14 +379,6 @@ def interactive_individual_line_plot(df, id_col, diagnosis_columns, FC_vars, sub
     out_table = widgets.Output()
     out_plot = widgets.Output()
 
-    # # Dropdown for comparison group selection
-    # comparison_selector = widgets.Dropdown(
-    #     options= ['All Children'] + sorted([x for x in df[groupby_col].unique() if isinstance(x, str)]),
-    #     value='All Children',
-    #     description='Compare to:',
-    #     disabled=False
-    # )
-    
     # Dropdown for diagnosis type selection
     diagnosis_type_dropdown = widgets.Dropdown(
         options=['All Children', 'Dyslexia Center Diagnosis'] + diagnosis_columns,  # Add other diagnosis types here
@@ -402,14 +394,6 @@ def interactive_individual_line_plot(df, id_col, diagnosis_columns, FC_vars, sub
         value='All Children',  # Set default value
         disabled=False
     )
-    # # Textbox for user to enter ID
-    # id_input = widgets.Text(
-    #     value='',
-    #     placeholder='Enter ID Number',
-    #     description='ID Number:',
-    #     disabled=False,
-    #     layout={'width': 'max-content'}
-    # )
     
     # Toggle buttons for SEM and STD
     sem_toggle = widgets.ToggleButton(

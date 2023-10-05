@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import nibabel as nib
 
 from matplotlib import font_manager
+from ucsfneuroviz.utils import extract_dc_diagnoses
 
 def activate_selected_font(font_name, font_file_name):
     # Get the path of the script
@@ -83,17 +84,7 @@ def validate_id_number(id_number_str, df, out_error):
             out_error.clear_output(wait=True)  # Clear the error if the new ID is valid
         return np.int64(id_number_str)
 
-def extract_dc_diagnoses(df):
-    diagnoses = []
-    for col in df.columns:
-        if 'Dyslexia Center Diagnosis: (choice=' in col:
-            diagnosis = col.split('=')[-1]
-            # replace the very last parenthesis with nothing
-            diagnosis = diagnosis[::-1].replace(')', '', 1)[::-1]
-            # remove the stuff in curly braces
-            # diagnosis = diagnosis.split('{')[0].strip()
-            diagnoses.append(diagnosis)
-    return diagnoses
+
 
 def zscore_subject(id_number, brain_df, behavior_df, col, value):
     """
@@ -187,12 +178,12 @@ def plot_bar_for_thresholded_regions(z_data, dtype, thresh):
     prominent_regions = [col for col in z_data.columns if z_data[col].abs().mean() > thresh]
     prominent_regions = sorted(prominent_regions, key=lambda x: z_data[x].mean(), reverse=True)
 
-    fig, ax = plt.subplots(figsize=(10, 5))
+    fig, ax = plt.subplots(figsize=(15, 5))
     ax.bar(prominent_regions, z_data[prominent_regions].values[0], color=(0.2, 0.4, 0.6, 0.6))
     ax.set_ylabel('Z-Score')
     ax.set_title(f'Regions with Abs(Z-Score) > {thresh}')
     ax.set_xticks(prominent_regions)
-    ax.set_xticklabels(prominent_regions, rotation=90)
+    ax.set_xticklabels(prominent_regions, rotation=45)
     ax.axhline(y=0, color='black', linestyle='--')
     plt.tight_layout()
     return fig
@@ -245,6 +236,7 @@ def create_interactive_table(df, compare_brain_data, id_number, z_data, dtype, t
 
 def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns, subject_id, date):
 
+
     display(HTML(f'<h3 style="color: #052049;">Plot z-scores on a cortical surface comparing the current participant to a selected group of participants.<br></h3>'))
     activate_selected_font('EB Garamond', 'EBGaramond-Regular.ttf')
 
@@ -272,15 +264,6 @@ def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns, subj
         disabled=False
     )
 
-    # # Textbox for user to enter ID
-    # id_input = widgets.Text(
-    #     value='',
-    #     placeholder='Enter ID Number',
-    #     description='ID Number:',
-    #     disabled=False,  
-    #     layout={'width': 'max-content'}
-    # )
-    
     # Radio buttons for data type selection
     data_type_selector = widgets.RadioButtons(
         options=['Gray Matter Volume', 'Surface Area', 'Average Cortical Thickness', 'Local Gyrification Index'],
@@ -301,21 +284,15 @@ def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns, subj
         icon='check'
     )
 
-    # Widgets for user inputs
-    thresh_input = widgets.FloatText(
+    thresh_slider = widgets.FloatSlider(
         value=1,
+        min=0,
+        max=2.0,
+        step=0.25,
         description='Threshold:',
-        disabled=False,
-        layout={'width': 'max-content'}
+        continuous_update=False  # Update only when mouse is released
     )
 
-    plot_thresh_button = widgets.Button(
-        description='Plot Regions',
-        disabled=False,
-        button_style='', 
-        tooltip='Click to plot regions with z-scores above the threshold',
-        icon='check'
-    )
 
     def update_diagnosis_options(change):
         new_type = change['new']
@@ -336,6 +313,7 @@ def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns, subj
 
     # Update function
     def update_brain_plot(button):
+
         out_brain.clear_output(wait=True) # Clear the output widget
         dtype = data_type_selector.value
         brain_df_current = get_dataframe(brain_df, dtype)
@@ -360,12 +338,11 @@ def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns, subj
             # display(behavior_df[behavior_df['ID Number'] == id_number]['Other:']) ###
             display(brain_widget)
 
-    def on_plot_thresh_button_clicked(button):
-        """Action when the 'Plot Threshold' button is clicked."""
+    # Function to update threshold plots
+    def update_thresh_plots():
         dtype = data_type_selector.value
         brain_df_current = get_dataframe(brain_df, dtype)
-        # id_number = validate_id_number(id_input.value.strip(), brain_df_current, out_error)
-        thresh_value = thresh_input.value
+        thresh_value = thresh_slider.value
         z_data, compare_brain_data = zscore_subject(subject_id, brain_df_current, behavior_df, diagnosis_type_dropdown.value, diagnosis_dropdown.value)
         
         # Display the bar plot
@@ -380,21 +357,26 @@ def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns, subj
             out_table.clear_output(wait=True)
             display(widgets.HBox([region_selector, out_plot]))
 
+    # Function to handle slider change
+    def on_slider_value_change(change):
+        update_thresh_plots()
+
     # Assign the update function to the button
     plot_brain_button.on_click(update_brain_plot)
+    # Assign the update function to the slider
+    thresh_slider.observe(on_slider_value_change, names='value')
 
-    # Assign the update function to the button
-    plot_thresh_button.on_click(on_plot_thresh_button_clicked)
-
-    # Display the widgets
-    # display(Markdown('## Enter an ID number, group of comparison subjects, and metric type.'))
+    # Step 1: Display the static widgets first
     display(widgets.HBox([diagnosis_type_dropdown, diagnosis_dropdown, data_type_selector, plot_brain_button]))
-    # display(out_error)
-    display(out_brain)
 
-    # Display widgets
-    # display(Markdown('## Enter a threshold to plot the regions where |z-score| > threshold.'))
-    display(widgets.HBox([thresh_input, plot_thresh_button]))
-    # display(out_bar)
+    # Step 2: Trigger the initial brain plot
+    update_brain_plot(None)
+
+    # Step 3: Display the output areas
+    display(out_brain)
+    display(thresh_slider)
     display(widgets.VBox([out_bar]))
-    display(out_table)  
+    display(out_table)
+
+    # Step 4: Activate dynamic content
+    on_slider_value_change({'new': 1})
