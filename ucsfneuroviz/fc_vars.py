@@ -40,6 +40,29 @@ FC_vars = {'WASI Matrix Reasoning':'WASI - Matrix Reasoning Percentile:',
  'WCJ Calculations':'Woodcock Johnson Test of Achievement (Test 5) Calculations Percentile:'}
 
 
+FC_neuropsych_chart = {'Reasoning Estimates': ['mat_r_per', 'wiscv_figweight_per', 'rowpvt_percentile', 'wj_oral_perc'],
+              'Registration & Working Memory': ['digitforward_percentile', 'digitbackward_percentile', 'spatialforward_percentile', 'spatialbackward_percentile'],
+              'Processing Speed': ['naming_per', 'sym_search_perc', 'color_ta_per', 'coding_percentile'],
+              'Learning & Memory': ['cvlt_trial1_percentile', 'cvlt_trial5_percentile', 'cvltc_ldfr_percentile', 'rey_delay_percentile'],
+              'Visuospatial/Visuomotor':['beery_percentile', 'jolo_percentile', 'rey_copy_percentile', 'coding_percentile'],
+              'Executive Functioning': ['phonfluency_percentile', 'dkefs_df_filled_perc', 'color_tb_per', 'inhib_perc', 'switching_percentile']
+}
+
+FC_language_chart = {'Phonology': ['wj_seg_per', 'wj_soundblend_per', 'wj_soundawareness_per'],
+                     'Phonological Loop': ['wj_nonwordrep_per', 'wj_memwords_perc'],
+                     'Semantic Impact': ['wj_sentrep_perc', 'semanticfluency_percentile'],
+                     'Rapid Naming': ['wj_rapnaming_per'],
+                     'Reading': ['wj_lw_per', 'wj_wordattack_per', 'towre_sde_per', 'towre_pde_per', 
+                                 'rate_percentile', 'accuracy_percentile', 'fluency_percentile', 'comp_percentile',
+                                 'ktea_read_percentile', 'ktea_listen_percentile'],
+                    'Spelling': ['wj_spelling_per', 'wj_spellingsounds_per'],
+                    'Calculations': ['wj_calc_perc']
+}
+
+FC_language_supp_chart = ['morph_tot', 'ppt25_pic']
+
+math_chart = {'Number Processing': ['']}
+
 FC_vars_select = {'WASI Matrix Reasoning':'WASI - Matrix Reasoning Percentile:',
  'WISC-IV Digit Span Forward':'WISC-V - Digit Span Forward Percentile:',
  'WISC-IV Digit Span Backward':'WISC-V - Digit Span Backward Percentile:',

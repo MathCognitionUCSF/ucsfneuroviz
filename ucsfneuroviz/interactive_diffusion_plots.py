@@ -323,7 +323,6 @@ def interactive_dti_metrics(slcount_df, profiles_df, behavior_df, diagnosis_colu
         )
         
         # Redisplay the widgets
-        # display(widgets.HBox([diagnosis_type_dropdown, diagnosis_dropdown, submit_button]))
         display(widgets.HBox([tract_selector, out_plot]))
     
     # Display widgets
@@ -333,6 +332,3 @@ def interactive_dti_metrics(slcount_df, profiles_df, behavior_df, diagnosis_colu
     submit_button.on_click(update_sub_and_comparison_data)
     # Trigger intial plot for 'All Children' default dropdown selection
     update_sub_and_comparison_data(None)
-
-
-    # display(widgets.HBox([tract_selector, out_plot]))
