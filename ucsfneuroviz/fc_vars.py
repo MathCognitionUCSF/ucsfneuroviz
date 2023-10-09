@@ -61,7 +61,27 @@ FC_language_chart = {'Phonology': ['wj_seg_per', 'wj_soundblend_per', 'wj_sounda
 
 FC_language_supp_chart = ['morph_tot', 'ppt25_pic']
 
-math_chart = {'Number Processing': ['']}
+math_chart = {'Number Processing':['dsb2_verb_num_pe', 'dsb2_num_verb_r_pe', 'dsb2_num_verb_w_pe', 'dsb2_count_f_pe',
+                'dsb2_count_b_pe', 'dsb2_compa_int_pe', 'dsb2_compa_frac_pe', 'dsb2_compa_dec_pe','dsb2_numb_line_no_pe',
+                'dsb2_numb_line_lo_pe', 'dsb2_numb_line_lp_pe'],
+              'Arithmetic Facts':['dsb2_add_fact_pe', 'dsb2_ment_add_pe', 'dsb2_sub_fact_pe', 'dsb2_ment_sub_pe',
+                'dsb2_mult_fact_pe', 'dsb2_mult_table_pe', 'dsb2_comp_addsub_pe', 'dsb2_comp_multdiv_pe'],
+              'Other':
+                ['dsb2_equiv_frac_pe',
+                'dsb2_seq_pe',
+                'dsb2_word_prob_pe',
+                'dsb2_simpli_pe',
+                'dsb2_equat_pe',
+                'dsb2_perim_raw',
+                'dsb2_perim_max',
+                'dsb2_perim_pe',
+                'dsb2_perim_time',
+                'dsb2_area_pe',
+                'dsb2_model_pe',
+                'dsb2_visuo_repro_pe',
+                'dsb2_visuo_recog_pe']}
+
+
 
 FC_vars_select = {'WASI Matrix Reasoning':'WASI - Matrix Reasoning Percentile:',
  'WISC-IV Digit Span Forward':'WISC-V - Digit Span Forward Percentile:',
