@@ -37,18 +37,61 @@ FC_vars = {'WASI Matrix Reasoning':'WASI - Matrix Reasoning Percentile:',
  'GORT-5 Comprehension':'GORT-5 Comprehension Percentile:',
  'WCJ Spelling of Sounds':'Woodcock Johnson Test of Achievement (Test 16) Spelling of Sounds Percentile:',
  'WCJ Spelling':'Woodcock Johnson Test of Achievement (Test 3) Spelling Percentile:',
- 'WCJ Calculations':'Woodcock Johnson Test of Achievement (Test 5) Calculations Percentile:'}
+ 'WCJ Calculations':'Woodcock Johnson Test of Achievement (Test 5) Calculations Percentile:'
+ }
+
+FC_vars_labels = {'mat_r_per': 'WASI Matrix Reasoning',
+        'rowpvt_percentile': 'ROWPVT-4',
+        'cvlt_trial1_percentile': 'CVLT-C Trial 1',
+        'digitforward_percentile': 'WISC-IV Digit Span Forward',
+        'spatialforward_percentile': 'WISC-IV Spatial Span Forward',
+        'digitbackward_percentile': 'WISC-IV Digit Span Backward',
+        'spatialbackward_percentile': 'WISC-IV Spatial Span Backward',
+        'naming_per': 'NEPSY-II Naming',
+        'sym_search_perc': 'WISC-IV Symbol Search',
+        'color_ta_per': "Children's Colored Trails A",
+        'cvlt_trial5_percentile': 'CVLT-C Trial 5',
+        'cvltc_sdfr_percentile': 'CVLT-C SDFR',
+        'cvltc_ldfr_percentile': 'CVLT-C LDFR',
+        'rey_delay_percentile': 'Rey-O Delay',
+        'jolo_percentile': 'Judgment of Line Orientation',
+        'beery_percentile': 'Beery VMI',
+        'coding_percentile': 'WISC-IV Coding',
+        'semanticfluency_percentile': 'NEPSY-II Semantic Fluency',
+        'phonfluency_percentile': 'NEPSY-II Phonemic Fluency',
+        'dkefs_df_filled_perc': 'DKEFS Design Fluency Filled',
+        'inhib_perc': 'NEPSY-II Inhibition',
+        'switching_perc': 'NEPSY-II Switching',
+        'color_tb_per': "Children's Colored Trails B",
+        'wj_seg_per': 'WCJ Segmentation',
+        'wj_soundblend_per': 'WCJ Sound Blending',
+        'wj_soundawareness_per': 'WCJ Sound Awareness',
+        'wj_nonwordrep_per': 'WCJ Nonword Repetition',
+        'wj_memwords_perc': 'WCJ Memory for Words',
+        'wj_sentrep_perc': 'WCJ Sentence Repetition',
+        'wj_rapnaming_per': 'WCJ Rapid Picture Naming',
+        'wj_lw_per': 'WCJ Letter-Word Identification',
+        'wj_wordattack_per': 'WCJ Word Attack',
+        'towre_sde_per': 'TOWRE-2 Sight Word Efficiency',
+        'towre_pde_per': 'TOWRE-2 Phonemic Decoding Efficiency',
+        'rate_percentile': 'GORT-5 Rate',
+        'accuracy_percentile': 'GORT-5 Accuracy',
+        'comp_percentile': 'GORT-5 Comprehension',
+        'wj_spellingsounds_per': 'WCJ Spelling of Sounds',
+        'wj_spelling_per': 'WCJ Spelling',
+        'wj_calc_per': 'WCJ Calculations'
+ }
 
 
-FC_neuropsych_chart = {'Reasoning Estimates': ['mat_r_per', 'wiscv_figweight_per', 'rowpvt_percentile', 'wj_oral_perc'],
+FC_neuropsych_dict = {'Reasoning Estimates': ['mat_r_per', 'wiscv_figweight_per', 'rowpvt_percentile', 'wj_oral_perc'],
               'Registration & Working Memory': ['digitforward_percentile', 'digitbackward_percentile', 'spatialforward_percentile', 'spatialbackward_percentile'],
               'Processing Speed': ['naming_per', 'sym_search_perc', 'color_ta_per', 'coding_percentile'],
               'Learning & Memory': ['cvlt_trial1_percentile', 'cvlt_trial5_percentile', 'cvltc_ldfr_percentile', 'rey_delay_percentile'],
-              'Visuospatial/Visuomotor':['beery_percentile', 'jolo_percentile', 'rey_copy_percentile', 'coding_percentile'],
-              'Executive Functioning': ['phonfluency_percentile', 'dkefs_df_filled_perc', 'color_tb_per', 'inhib_perc', 'switching_percentile']
+              'Visuospatial/Visuomotor':['beery_percentile', 'jolo_percentile', 'wiscv_vispuzzle_per'],
+              'Executive Functioning': ['phonfluency_percentile', 'dkefs_df_filled_perc', 'color_tb_per', 'inhib_perc', 'switching_perc']
 }
 
-FC_language_chart = {'Phonology': ['wj_seg_per', 'wj_soundblend_per', 'wj_soundawareness_per'],
+FC_language_dict = {'Phonology': ['wj_seg_per', 'wj_soundblend_per', 'wj_soundawareness_per'],
                      'Phonological Loop': ['wj_nonwordrep_per', 'wj_memwords_perc'],
                      'Semantic Impact': ['wj_sentrep_perc', 'semanticfluency_percentile'],
                      'Rapid Naming': ['wj_rapnaming_per'],
@@ -56,32 +99,30 @@ FC_language_chart = {'Phonology': ['wj_seg_per', 'wj_soundblend_per', 'wj_sounda
                                  'rate_percentile', 'accuracy_percentile', 'fluency_percentile', 'comp_percentile',
                                  'ktea_read_percentile', 'ktea_listen_percentile'],
                     'Spelling': ['wj_spelling_per', 'wj_spellingsounds_per'],
-                    'Calculations': ['wj_calc_perc']
+                    'Calculations': ['wj_calc_per']
 }
 
-FC_language_supp_chart = ['morph_tot', 'ppt25_pic']
+FC_language_supp_dict = ['morph_tot', 'ppt25_pic']
 
-math_chart = {'Number Processing':['dsb2_verb_num_pe', 'dsb2_num_verb_r_pe', 'dsb2_num_verb_w_pe', 'dsb2_count_f_pe',
-                'dsb2_count_b_pe', 'dsb2_compa_int_pe', 'dsb2_compa_frac_pe', 'dsb2_compa_dec_pe','dsb2_numb_line_no_pe',
-                'dsb2_numb_line_lo_pe', 'dsb2_numb_line_lp_pe'],
-              'Arithmetic Facts':['dsb2_add_fact_pe', 'dsb2_ment_add_pe', 'dsb2_sub_fact_pe', 'dsb2_ment_sub_pe',
-                'dsb2_mult_fact_pe', 'dsb2_mult_table_pe', 'dsb2_comp_addsub_pe', 'dsb2_comp_multdiv_pe'],
-              'Other':
-                ['dsb2_equiv_frac_pe',
-                'dsb2_seq_pe',
-                'dsb2_word_prob_pe',
-                'dsb2_simpli_pe',
-                'dsb2_equat_pe',
-                'dsb2_perim_raw',
-                'dsb2_perim_max',
-                'dsb2_perim_pe',
-                'dsb2_perim_time',
-                'dsb2_area_pe',
-                'dsb2_model_pe',
-                'dsb2_visuo_repro_pe',
-                'dsb2_visuo_recog_pe']}
-
-
+# math_chart = {'Number Processing':['dsb2_verb_num_pe', 'dsb2_num_verb_r_pe', 'dsb2_num_verb_w_pe', 'dsb2_count_f_pe',
+#                 'dsb2_count_b_pe', 'dsb2_compa_int_pe', 'dsb2_compa_frac_pe', 'dsb2_compa_dec_pe','dsb2_numb_line_no_pe',
+#                 'dsb2_numb_line_lo_pe', 'dsb2_numb_line_lp_pe'],
+#               'Arithmetic Facts':['dsb2_add_fact_pe', 'dsb2_ment_add_pe', 'dsb2_sub_fact_pe', 'dsb2_ment_sub_pe',
+#                 'dsb2_mult_fact_pe', 'dsb2_mult_table_pe', 'dsb2_comp_addsub_pe', 'dsb2_comp_multdiv_pe'],
+#               'Other':
+#                 ['dsb2_equiv_frac_pe',
+#                 'dsb2_seq_pe',
+#                 'dsb2_word_prob_pe',
+#                 'dsb2_simpli_pe',
+#                 'dsb2_equat_pe',
+#                 'dsb2_perim_raw',
+#                 'dsb2_perim_max',
+#                 'dsb2_perim_pe',
+#                 'dsb2_perim_time',
+#                 'dsb2_area_pe',
+#                 'dsb2_model_pe',
+#                 'dsb2_visuo_repro_pe',
+#                 'dsb2_visuo_recog_pe']}
 
 FC_vars_select = {'WASI Matrix Reasoning':'WASI - Matrix Reasoning Percentile:',
  'WISC-IV Digit Span Forward':'WISC-V - Digit Span Forward Percentile:',

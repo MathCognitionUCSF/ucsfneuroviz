@@ -183,7 +183,7 @@ def plot_bar_for_thresholded_regions(z_data, dtype, thresh):
     ax.set_ylabel('Z-Score')
     ax.set_title(f'Regions with Abs(Z-Score) > {thresh}')
     ax.set_xticks(prominent_regions)
-    ax.set_xticklabels(prominent_regions, rotation=45)
+    ax.set_xticklabels(prominent_regions, rotation=90)
     ax.axhline(y=0, color='black', linestyle='--')
     plt.tight_layout()
     return fig
@@ -235,7 +235,6 @@ def create_interactive_table(df, compare_brain_data, id_number, z_data, dtype, t
     return region_selector
 
 def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns, subject_id, date):
-
 
     display(HTML(f'<h3 style="color: #052049;">Plot z-scores on a cortical surface comparing the current participant to a selected group of participants.<br></h3>'))
     activate_selected_font('EB Garamond', 'EBGaramond-Regular.ttf')
@@ -333,7 +332,7 @@ def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns, subj
             print_diagnoses = print_diagnoses.replace('Other', f'Other (note: {other_note})')
 
         with out_brain:
-            display(HTML(f'<h3 style="color: #878D96;">{subject_id} Dyslexia Center Diagnosis:<br>{print_diagnoses}</h3>'))
+            # display(HTML(f'<h3 style="color: #878D96;">{subject_id} Dyslexia Center Diagnosis:<br>{print_diagnoses}</h3>')) # UNCOMMENT THIS AND DEBUG DIAGNOSIS PRINTING WHEN READY!!!!
             # display(Markdown(f'    {id_number} Dyslexia Center Diagnosis: {print_diagnoses}'))
             # display(behavior_df[behavior_df['ID Number'] == id_number]['Other:']) ###
             display(brain_widget)

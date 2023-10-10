@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 import seaborn as sns
 from ipywidgets import widgets, HBox, VBox, Output
-from IPython.display import display
+from IPython.display import display, IFrame, HTML
 import glob
 import os
 import regex as re
@@ -205,12 +205,24 @@ def generate_plots(sub_data_profiles, compare_data_profiles, sub_data_slcount, c
             # Apply custom legend
             ax[i, 1].legend(handles=[handle_comp_group, handle_subject], loc='center left', bbox_to_anchor=(1, 0.5))
         else:
-            # Leave this space completely blank
-            ax[i, 1].axis('off')
+            # make a bar plot for laterality using the streamlines count data
+            # get left and right slcount for the subject using sub_data_slcount
+            # get tract_base by removing the _L or _R from the tract name if it exists
+            if tract.endswith('_L'):
+                tract_base = tract.replace('_L', '')
+            elif tract.endswith('_R'):
+                tract_base = tract.replace('_R', '')
+
+            left_slcount = sub_data_slcount[sub_data_slcount['tractID'] == tract_base + '_L']['n_streamlines_clean'].values[0]
+            right_slcount = sub_data_slcount[sub_data_slcount['tractID'] == tract_base + '_R']['n_streamlines_clean'].values[0]
+
+            ax[i, 1].bar(x=['Left', 'Right'], height=[left_slcount, right_slcount], color=['lightgray', 'lightgray'])
+            ax[i, 1].set_title(f'Streamline Counts for {tract}')
+            ax[i, 1].set_ylabel('Streamlines')
+            ax[i, 1].set_xlabel('Hemisphere')
 
     plt.tight_layout()
     return fig
-
 
 
 # Interactive function to update plots based on selected tract
@@ -323,12 +335,30 @@ def interactive_dti_metrics(slcount_df, profiles_df, behavior_df, diagnosis_colu
         )
         
         # Redisplay the widgets
+        display(widgets.HTML("<h3>View m.</h3>"))
         display(widgets.HBox([tract_selector, out_plot]))
     
     # Display widgets
+    # display markdown "Explore the white matter tracts interactively."
     display(widgets.HBox([diagnosis_type_dropdown, diagnosis_dropdown, submit_button]))
 
     # link the submit button to the update_sub_and_comparison_data function
     submit_button.on_click(update_sub_and_comparison_data)
     # Trigger intial plot for 'All Children' default dropdown selection
     update_sub_and_comparison_data(None)
+
+def plot_diffusion_html(local_path, ldrive_path_diffusion, subject_id, date):
+
+    file_name_diffusion = f"sub-{subject_id}_ses-{date}_space-T1w_desc-preproc_dwi_space-RASMM_model-probCSD_algo-AFQ_desc-viz_dwi.html"
+    full_path_to_file_diffusion = os.path.join(ldrive_path_diffusion, file_name_diffusion)
+
+    # if file is not already in local folder, copy it from ldrive
+    if not os.path.isfile(os.path.join(local_path, file_name_diffusion)):
+        os.system(f"cp {full_path_to_file_diffusion} {local_path}")
+
+    full_path_local_func = os.path.join(local_path, file_name_diffusion)
+
+    iframe = IFrame(src=full_path_local_func, width="90%", height="600")
+    
+    display(HTML(f'<h3 style="color: #052049;">Explore the white matter tracts interactively.<br></h3>'))
+    display(iframe)
