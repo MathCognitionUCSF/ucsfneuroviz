@@ -12,7 +12,7 @@ git clone https://github.com/MathCognitionUCSF/ucsfneuroviz.git
 cd ucsfneuroviz
 
 #### 3. Create a Virtual Environment
-python3 -m venv venv (or python -m venv venv depending on your setup)
+python3 -m venv ucsfneuroviz (or python -m venv venv depending on your setup)
 
 #### 4. Activate the Environment
 Mac/Linux: source venv/bin/activate
@@ -28,7 +28,7 @@ pip install -r requirements.txt
 cd ucsfneuroviz
 
 #### 2. Activate the Environment
-Mac/Linux: source venv/bin/activate
+Mac/Linux: source venv/bin/activate &nbsp
 Windows: venv\Scripts\activate
 
 #### 3. Connect to L-drive
