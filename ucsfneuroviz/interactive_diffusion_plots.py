@@ -335,7 +335,7 @@ def interactive_dti_metrics(slcount_df, profiles_df, behavior_df, diagnosis_colu
         )
         
         # Redisplay the widgets
-        display(widgets.HTML("<h3>View m.</h3>"))
+        display(widgets.HTML("<h3>View metrics for individual tracts compared to selected group.</h3>"))
         display(widgets.HBox([tract_selector, out_plot]))
     
     # Display widgets
