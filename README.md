@@ -3,24 +3,36 @@ Tools for an interactive browser page to visualize MRI data and behavioral score
 
 ## Getting Started
 
-### Clone the repository
+## Setup:
+
+#### 1. Clone the repository
 git clone https://github.com/MathCognitionUCSF/ucsfneuroviz.git
 
-### Navigate into Project
+#### 2. Navigate into Repository 
 cd ucsfneuroviz
 
-### Create a Virtual Environment
+#### 3. Create a Virtual Environment
 python3 -m venv venv (or python -m venv venv depending on your setup)
 
-### Activate the Environment
+#### 4. Activate the Environment
 Mac/Linux: source venv/bin/activate
 Windows: venv\Scripts\activate
 
-### Install Requirements
+#### 5. Install Requirements
 pip install -r requirements.txt
 
-### Connect to L-drive
+
+## How to use:
+
+#### 1. Navigate into Repository
+cd ucsfneuroviz
+
+#### 2. Activate the Environment
+Mac/Linux: source venv/bin/activate
+Windows: venv\Scripts\activate
+
+#### 3. Connect to L-drive
 connect to the L-drive server so your local computer has access to the necessary data
 
-### Launch the browser page with Voila:
+#### 4. Launch the browser page with Voila
 voila --Voila.config_file_paths=./.voila/ browser-page-filename.ipynb
