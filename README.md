@@ -35,4 +35,4 @@ Windows: venv\Scripts\activate
 connect to the L-drive server so your local computer has access to the necessary data
 
 #### 4. Launch the browser page with Voila
-voila --Voila.config_file_paths=./.voila/ browser-page-filename.ipynb
+voila --Voila.config_file_paths=./.voila/ dyslexia-browser.ipynb
