@@ -19,5 +19,8 @@ Windows: venv\Scripts\activate
 ### Install Requirements
 pip install -r requirements.txt
 
+### Connect to L-drive
+connect to the L-drive server so your local computer has access to the necessary data
+
 ### Launch the browser page with Voila:
 voila --Voila.config_file_paths=./.voila/ browser-page-filename.ipynb

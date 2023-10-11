@@ -217,7 +217,7 @@ def generate_plots(sub_data_profiles, compare_data_profiles, sub_data_slcount, c
             right_slcount = sub_data_slcount[sub_data_slcount['tractID'] == tract_base + '_R']['n_streamlines_clean'].values[0]
 
             ax[i, 1].bar(x=['Left', 'Right'], height=[left_slcount, right_slcount], color=['lightgray', 'lightgray'])
-            ax[i, 1].set_title(f'Streamline Counts for {tract}')
+            ax[i, 1].set_title(f'Streamline Counts for {tract_base}')
             ax[i, 1].set_ylabel('Streamlines')
             ax[i, 1].set_xlabel('Hemisphere')
 

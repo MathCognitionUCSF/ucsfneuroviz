@@ -522,229 +522,7 @@ def interactive_individual_line_plot(df, id_col, diagnosis_columns, FC_vars, sub
     display(out_table)  # Display the Output widget below your other widgets
 
 
-# Define a function that plots the scores for the selected id_number. Use FC_vars to get the labels for the tasks.
-# def plot_FC_scores(raw_behavior_df, FC_dict, subject_id, id_col):
-#     # Using the keys (domains) and values (lists of column names), plot the scores for each domain on a bar plot
-#     fig, ax = plt.subplots(1, 2, figsize=(20, 10))
-
-#     # Plot neuropsych for each list of the scores in each value
-#     for domain, tasks in FC_dict.items():
-#         # Plot all domains on the same plot, but categorize by domain with domaain labels as well
-#         neuropsych_df = raw_behavior_df[tasks]
-
-#     neuropsych_df = raw_behavior_df[FC_dict['neuropsych']]
-#     neuropsych_df = neuropsych_df[neuropsych_df[id_col] == subject_id]
-#     neuropsych_df = neuropsych_df.T.reset_index()
-#     neuropsych_df.columns = ['task', 'score']
-#     neuropsych_df['task'] = neuropsych_df['task'].apply(lambda x: x.split(': ')[-1])
-#     sns.barplot(x='score', y='task', data=neuropsych_df, ax=ax[0])
-#     ax[0].set_title('Neuropsych Scores')
-#     ax[0].set_xlabel('Score')
-#     ax[0].set_ylabel('Task')
-#     ax[0].set_xlim(0, 100)
-#     ax[0].set_xticks(range(0, 101, 10))
-#     ax[0].set_xticklabels(range(0, 101, 10))
-#     ax[0].set_yticklabels(neuropsych_df['task'])
-#     ax[0].set_yticks(range(len(neuropsych_df)))
-    
-#     # Add a dotted red line at 50
-#     ax[0].axvline(x=50, color='red', linestyle='--', linewidth=1)
-
-#     return fig
-
-# def plot_FC_scores(raw_behavior_df, FC_dict, subject_id, id_col):
-#     """
-#     A function to plot FC scores grouped by domain.
-
-#     Parameters:
-#         raw_behavior_df (pd.DataFrame): Source data.
-#         FC_dict (dict): Mapping of domains to tasks.
-#         subject_id (str/int): The subject ID to plot data for.
-#         id_col (str): The column name where subject IDs are stored.
-    
-#     Returns:
-#         fig (matplotlib.figure.Figure): The created figure.
-#     """
-#     all_data = []
-#     for domain, tasks in FC_dict.items():
-#         for task in tasks:
-#             score = raw_behavior_df.loc[raw_behavior_df[id_col] == subject_id, task].values[0]
-#             all_data.append([domain, task, score])
-#     plot_df = pd.DataFrame(all_data, columns=['domain', 'task', 'score'])
-
-#     colors = ['#0F388A', '#14828C', '#007242', '#443E8C', '#6C247C', '#821A56']
-
-#     # Assign each task a color based on its domain. 
-#     # If not enough colors are provided, cycle through the colors.
-#     task_colors = {task: colors[i % len(colors)] 
-#                 for i, tasks in enumerate(FC_dict.values()) 
-#                 for task in tasks}
-    
-#     plot_df['score'] = pd.to_numeric(plot_df['score'], errors='coerce')
-#     plot_df = plot_df.dropna(subset=['score'])
-
-#     fig, ax = plt.subplots(figsize=(18, 10))
-#     sns.barplot(x='score', y='task', data=plot_df, palette=task_colors, ax=ax)
-
-#     # Move the plot to the right to make space for the labels
-#     ax.set_position([0.4, 0.1, 0.55, 0.8])  # [left, bottom, width, height]
-
-#     # Add space for domain labels
-#     # plt.subplots_adjust(left=0.8)  # Adjust left space
-
-#     # Adjust y-ticks and labels to create gaps between domains
-#     y_ticks = []
-#     y_ticklabels = []
-#     start_pos = 0
-#     gap = 1  # Adjust as per your requirements
-    
-#     for domain, tasks in FC_dict.items():
-#         end_pos = start_pos + len(tasks) / 2
-#         ax.text(-10, (start_pos + end_pos) / 2, domain, 
-#                 va='center', ha='right', 
-#                 fontweight='bold', fontsize=16)
-        
-#         y_ticks.extend(list(range(start_pos, start_pos + len(tasks))))
-#         y_ticklabels.extend(tasks)
-        
-#         start_pos += len(tasks) + gap  # Add a gap between domains
-
-#     ax.set_xlim(0, 110)
-#     ax.axvline(x=50, color='#E61048', linestyle='--', linewidth=1)
-#     ax.set_xlabel('Score')
-#     ax.set_ylabel('')
-
-#     return fig
-
-# def plot_FC_scores(raw_behavior_df, FC_dict, subject_id, id_col, title=''):
-#     all_data = []
-#     for domain, tasks in FC_dict.items():
-#         for task in tasks:
-#             score = raw_behavior_df.loc[raw_behavior_df[id_col] == subject_id, task].values[0]
-#             all_data.append([domain, task, score])
-#         # Insert NaN entry to create a gap in the plot
-#         all_data.append([domain, None, 0])
-#     plot_df = pd.DataFrame(all_data, columns=['domain', 'task', 'score'])
-
-#     colors = ['#178CCB', '#052049']
-#     task_colors = {task: colors[i % len(colors)] 
-#                    for i, tasks in enumerate(FC_dict.values()) 
-#                    for task in tasks}
-    
-#     plot_df['score'] = pd.to_numeric(plot_df['score'], errors='coerce')
-#     plot_df = plot_df.dropna(subset=['score'])
-
-#     fig, ax = plt.subplots(figsize=(14, 10))  
-
-#     sns.barplot(x='score', y='task', data=plot_df, palette=task_colors, ax=ax, zorder=1)
-
-#     # Move the whole barplot to the right to make space for the domain labels
-#     ax.set_position([0.4, 0.1, 0.55, 0.8])  # [left, bottom, width, height]
-
-#     # Add domain labels
-#     current_task_pos = 0
-#     for i, (domain, tasks) in enumerate(FC_dict.items()):
-#         domain_label_x = -20  # Adjust this value to ensure the domain label is placed nicely
-#         ax.annotate(domain, 
-#                     (domain_label_x, current_task_pos), 
-#                     textcoords="offset points",
-#                     xytext=(-10,10), ha='center',
-#                     fontsize=14, fontweight='bold', 
-#                     va='center')
-
-#         # Update position for the next domain label
-#         current_task_pos += len(tasks) + 1 
-    
-#     # Style plot
-#     # set x-axis limits: 0 to 100 in steps of 25
-#     ax.set_xlim(0, 100)
-#     ax.set_xticks(range(0, 101, 25))
-#     ax.axvline(x=50, color='#878D96', linestyle='--', linewidth=1, zorder=2)
-#     ax.axvspan(25, 75, facecolor='#E1E3E5', alpha=0.5, zorder=0)
-#     ax.set_xlim(left=-20)  # Adjust left space
-#     ax.set_xlabel('Score')
-#     ax.set_ylabel('')
-
-#     return fig
-
-
-# import plotly.graph_objects as go
-# import pandas as pd
-
-# def plotly_FC_scores(raw_behavior_df, FC_dict, subject_id, id_col, title=''):
-#     all_data = []
-#     task_order = []
-#     domain_positions = []
-
-#     # Accumulate task data and keep track of domain label positions
-#     position_counter = 0
-#     for domain, tasks in FC_dict.items():
-#         domain_positions.append((domain, position_counter + len(tasks)/2))
-#         for task in tasks:
-#             score = raw_behavior_df.loc[raw_behavior_df[id_col] == subject_id, task].values[0]
-#             all_data.append([domain, task, score])
-#             task_order.append(task)
-#         position_counter += len(tasks)
-        
-#     plot_df = pd.DataFrame(all_data, columns=['domain', 'task', 'score'])
-    
-#     # Color palette
-#     blue_palette = ['#052049', '#07407D', '#0961B0', '#178CCB', '#5AA1D6', '#9CBFE2']
-#     colors = {domain: blue_palette[i % len(blue_palette)] 
-#                     for i, domain in enumerate(FC_dict.keys())}
-#     task_colors = {task: colors[domain] 
-#                    for domain, tasks in FC_dict.items()
-#                    for task in tasks}
-
-#     # Create figure
-#     fig = go.Figure()
-    
-#     # Add bars
-#     for task, color in task_colors.items():
-#         fig.add_trace(go.Bar(
-#             x=plot_df[plot_df['task']==task]['score'],
-#             y=plot_df[plot_df['task']==task]['task'],
-#             marker_color=color,
-#             orientation='h'
-#         ))
-    
-#     # Style adjustments
-#     fig.update_layout(
-#         barmode='stack',
-#         xaxis_title="Score",
-#         yaxis_title="Task",
-#         xaxis_range=[0, 100],
-#         xaxis_dtick=25,
-#         showlegend=False,
-#         title_text=title,
-#         title_x=0.5,
-#         title_font_size=20,
-#         height=600,
-#         margin=dict(l=200)  # Increase left margin for domain labels
-#     )
-
-#     # Add domain labels
-#     for domain, pos in domain_positions:
-#         fig.add_annotation(
-#             text='<b>{}</b>'.format(domain),
-#             xref="paper", yref="y",
-#             x=0, y=pos,
-#             showarrow=False,
-#             xanchor="right", yanchor="middle",
-#             font=dict(size=14)
-#         )
-
-#     # Ensure tasks are plotted in the order specified in task_order
-#     fig.update_layout(yaxis={'categoryorder': 'array', 'categoryarray': task_order})
-    
-#     return fig
-
-
-
-import plotly.graph_objects as go
-import pandas as pd
-
-def plotly_FC_scores(raw_behavior_df, FC_dict, subject_id, id_col, title=''):
+def plotly_FC_scores(raw_behavior_df, FC_dict, FC_vars_labels, subject_id, id_col, title=''):
     all_data = []
     task_order = []
     domain_labels = []
@@ -762,6 +540,10 @@ def plotly_FC_scores(raw_behavior_df, FC_dict, subject_id, id_col, title=''):
     plot_df = pd.DataFrame(all_data, columns=['domain', 'task', 'score'])
     # drop rows that have NaN values in the score column
     plot_df = plot_df.dropna(subset=['score'])
+    # reverse the order of the rows
+    plot_df = plot_df.iloc[::-1]
+    # replace the task names with the labels using the dict of task:label
+    plot_df['task'] = plot_df['task'].map(FC_vars_labels)
     display(plot_df)
     
     # Creating a color palette
@@ -779,6 +561,9 @@ def plotly_FC_scores(raw_behavior_df, FC_dict, subject_id, id_col, title=''):
             text='<b>{}</b>'.format(domain),
             xref="paper", yref="y",
             x=0, y=plot_df[plot_df['domain']==domain].index[0],
+            # get the list of task labels using FC_vars_labels (dict)
+            # get labels for the domain using FC_dict (dict)
+
             showarrow=False,
             xanchor="left", yanchor="top",
             font=dict(size=14)
@@ -805,12 +590,12 @@ def plotly_FC_scores(raw_behavior_df, FC_dict, subject_id, id_col, title=''):
         yaxis_title="",
         xaxis_range=[0, 100],
         xaxis_dtick=25,
-        yaxis={'categoryorder': 'array', 'categoryarray': task_order},
+        yaxis={'categoryorder':'array', 'categoryarray':task_order},
         showlegend=False,
         title_text=title,
         title_x=0.5,
         title_font_size=20,
-        # height=100,
+        height=100,
         margin=dict(l=150)  # Adjust left margin to make space for domain labels
     )
 
