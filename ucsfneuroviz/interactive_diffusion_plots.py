@@ -12,7 +12,7 @@ import regex as re
 
 from ucsfneuroviz.utils import extract_dc_diagnoses
 
-def create_dti_metric_df(slcount_path, metric_keyword):
+def create_dti_metric_df_old(slcount_path, metric_keyword):
     """Read DTI metric CSV files from a directory and its subdirectories."""
     # Get all csv files with the streamlines count data inside any subfolder in the specified path
     slcount_files = glob.glob(os.path.join(slcount_path, '**', f'*{metric_keyword}*.csv'), recursive=True)
@@ -43,6 +43,44 @@ def create_dti_metric_df(slcount_path, metric_keyword):
         dfs.append(subject_df)
 
     # display(pd.concat(dfs, ignore_index=True)) # delete later
+
+    return pd.concat(dfs, ignore_index=True)
+
+def create_profiles_df(profiles_path):
+    # Create a dataframe combining each csv in the profiles_path directory with index_col=0
+    # Add a column id_number for the subject ID in the filename (sub-#####)
+    # Return the dataframe
+
+    # Get all csv files with the profiles data inside any subfolder in the specified path
+    profiles_files = glob.glob(os.path.join(profiles_path, '*profiles.csv'), recursive=True)
+
+    # Get the list of subject IDs from the filenames
+    subject_ids = [re.search(r'(?<=sub-)\d+', f).group(0) for f in profiles_files]
+
+    # Create df with the profiles data and add the subject ID as a column
+    dfs = []
+    for f, sub_id in zip(profiles_files, subject_ids):
+        subject_df = pd.read_csv(f, index_col=0)
+        subject_df['id_number'] = sub_id
+        dfs.append(subject_df)
+    
+    return pd.concat(dfs, ignore_index=True)
+
+def create_slcount_df(slcount_path):
+
+    # Get all csv files with the streamlines count data inside any subfolder in the specified path
+    slcount_files = glob.glob(os.path.join(slcount_path, '*slCount.csv'), recursive=True)
+
+    # Get the list of subject IDs from the filenames
+    subject_ids = [re.search(r'(?<=sub-)\d+', f).group(0) for f in slcount_files]
+
+    # Create df with the streamlines count data and add the subject ID as a column
+    dfs = []
+    for f, sub_id in zip(slcount_files, subject_ids):
+        subject_df = pd.read_csv(f)
+        subject_df = subject_df.rename(columns={'Unnamed: 0': 'tractID'})
+        subject_df['id_number'] = sub_id
+        dfs.append(subject_df)
 
     return pd.concat(dfs, ignore_index=True)
 
