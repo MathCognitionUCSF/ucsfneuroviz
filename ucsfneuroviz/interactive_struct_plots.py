@@ -118,47 +118,79 @@ def zscore_subject(id_number, brain_df, behavior_df, col, value):
 
     return zscores, compare_brain_data
 
-# Configuration for each hemisphere
-HEMI_CONFIG = {
-    'left': {
-        'label': 'lh_',
-        'annot': 'data/lh.aparc.annot',
-        'fsavg': 'infl_left'
-    },
-    'right': {
-        'label': 'rh_',
-        'annot': 'data/rh.aparc.annot',
-        'fsavg': 'infl_right'
-    }
-}
+def plot_hemisphere(hemi, z_data, global_vmin, global_vmax, title, cmap, symmetric_cmap=True):
 
-def plot_hemisphere(hemi, z_data, global_vmin, global_vmax):
+
     """Plots a hemisphere based on the given data."""
     z_data_tmp = z_data.copy()
-    
+
+    # Configuration for each hemisphere
+    HEMI_CONFIG = {
+        'left': {
+            'label': 'lh_',
+            'annot': 'data/lh.aparc.annot',
+            'fsavg': 'infl_left'
+        },
+        'right': {
+            'label': 'rh_',
+            'annot': 'data/rh.aparc.annot',
+            'fsavg': 'infl_right'
+        }
+    }
+        
     # Fetching Destrieux atlas and fsaverage
     labels, _, names = nib.freesurfer.read_annot(HEMI_CONFIG[hemi]['annot'])
+    # Decode the names so we can match them up with the z_data
+    names_string = [name.decode('utf-8') for name in names]
+    names_dict = dict(zip(names_string, names))
+    # Exclude "unknown" and "corpuscallosum" from names_string
+    names_string = [name for name in names_string if name not in ["unknown", "corpuscallosum"]] 
+    
+    # print("names_dict")
+    # print(names_dict) #!
+
     fsaverage = datasets.fetch_surf_fsaverage('fsaverage')
 
     z_data_tmp = z_data_tmp.filter(regex=f'^{HEMI_CONFIG[hemi]["label"]}')
     z_data_tmp.columns = z_data_tmp.columns.str.replace(f'{HEMI_CONFIG[hemi]["label"]}', '')
+    # Remove the ending after the _ in the column names, i.e. _thick
+    z_data_tmp.columns = z_data_tmp.columns.str.split('_').str[0]
+    
+    # print("z_data_tmp.columns")
+    # print(z_data_tmp.columns) #!
 
-    # Zip the values of z_data to the labels of the Destrieux atlas
-    region_values = dict(zip(names, z_data_tmp.values[0]))
+    # Zip the values of z_data whose column name matches the atlas name for each region
+    region_values = {name: z_data_tmp[name].values for name in names_string}
+    # Now replace the name_string with names original names using the names_dict we created earlier
+    region_values = {names_dict[name]: values for name, values in region_values.items()}
+
+    # print("region_values")
+    # print(region_values) #!
 
     # Initialize an array with zeros
     mapped_values = np.zeros_like(labels, dtype=float)
 
-    # Populate the mapped_values array using region_values dictionary
-    for label, value in region_values.items():
-        region_idx = names.index(label)
+    # Then later in your code, when mapping regions to values
+    for name, value in region_values.items():
+        region_idx = names.index(name)
         mapped_values[labels == region_idx] = value
 
-
+    # print("mapped_values")
+    # print(mapped_values) #!
+    # print(mapped_values.shape)
+        
     # Create the surface plot
-    view = plotting.view_surf(getattr(fsaverage, HEMI_CONFIG[hemi]['fsavg']), mapped_values,
-                            cmap='coolwarm', symmetric_cmap=True,
-                            vmax=np.max([np.abs(global_vmin), np.abs(global_vmax)]))
+    if symmetric_cmap==True:
+        view = plotting.view_surf(getattr(fsaverage, HEMI_CONFIG[hemi]['fsavg']), mapped_values,
+                                cmap=cmap, symmetric_cmap=True,
+                                vmax=np.max([np.abs(global_vmin), np.abs(global_vmax)]),
+                                title=title)
+    else:
+        view = plotting.view_surf(getattr(fsaverage, HEMI_CONFIG[hemi]['fsavg']), mapped_values,
+                        cmap=cmap, symmetric_cmap=False,
+                        vmin = global_vmin, 
+                        vmax = global_vmax,
+                        title=title)
     
     return widgets.HTML(view.get_iframe())  # Return the widget
 
@@ -168,8 +200,8 @@ def refactored_plot_brain(z_data):
     global_vmin = min(z_data.min())
     global_vmax = max(z_data.max())
     
-    left_hemi_widget = plot_hemisphere('left', z_data, global_vmin, global_vmax)
-    right_hemi_widget = plot_hemisphere('right', z_data, global_vmin, global_vmax)
+    left_hemi_widget = plot_hemisphere('left', z_data, global_vmin, global_vmax, title, cmap='coolwarm', symmetric_cmap=True)
+    right_hemi_widget = plot_hemisphere('right', z_data, global_vmin, global_vmax, title, cmap='coolwarm', symmetric_cmap=True)
 
     return widgets.HBox([left_hemi_widget, right_hemi_widget])
 
@@ -291,7 +323,6 @@ def interactive_brain_zscore_plot(brain_df, behavior_df, diagnosis_columns, subj
         description='Threshold:',
         continuous_update=False  # Update only when mouse is released
     )
-
 
     def update_diagnosis_options(change):
         new_type = change['new']
