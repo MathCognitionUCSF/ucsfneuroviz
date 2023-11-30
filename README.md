@@ -1,6 +1,8 @@
 # ucsfneuroviz
 Tools for an interactive browser page to visualize MRI data and behavioral scores in various contexts.
 
+![image](assets/ucsfneuroviz_flowchart_10-18-2023.png)
+
 ## Getting Started
 
 ## Setup:
